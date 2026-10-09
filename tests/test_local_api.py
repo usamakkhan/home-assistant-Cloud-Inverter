@@ -29,6 +29,23 @@ class LocalApiTests(unittest.TestCase):
             with self.subTest(value=value), self.assertRaises(ValueError):
                 local_api.normalize_analyzer_url(value)
 
+    def test_host_and_port_are_separate_and_port_can_be_overridden(self):
+        self.assertEqual(
+            local_api.build_analyzer_url("192.168.50.20", 8765),
+            "http://192.168.50.20:8765",
+        )
+        self.assertEqual(
+            local_api.build_analyzer_url("analyzer.local", 9876),
+            "http://analyzer.local:9876",
+        )
+        self.assertEqual(
+            local_api.split_analyzer_url("https://analyzer.local:9876"),
+            ("https", "analyzer.local", 9876),
+        )
+        for host, port in (("http://192.168.50.20", 8765), ("192.168.50.20:8765", 8765), ("192.168.50.20", 0)):
+            with self.subTest(host=host, port=port), self.assertRaises(ValueError):
+                local_api.build_analyzer_url(host, port)
+
     def test_rejects_unrelated_json_service(self):
         self.assertFalse(local_api.is_analyzer_config({"collector": {}}))
         self.assertFalse(local_api.is_analyzer_config({"documented_sensor_count": 47}))

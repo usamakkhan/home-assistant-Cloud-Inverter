@@ -10,7 +10,15 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .const import CONF_SCAN_INTERVAL, CONF_URL, DEFAULT_LOCAL_SCAN_INTERVAL, DOMAIN
+from .const import (
+    CONF_HOST,
+    CONF_PORT,
+    CONF_SCAN_INTERVAL,
+    CONF_URL,
+    DEFAULT_LOCAL_SCAN_INTERVAL,
+    DOMAIN,
+)
+from .local_api import build_analyzer_url, split_analyzer_url
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -19,7 +27,10 @@ class SolarMaxCoordinator(DataUpdateCoordinator[dict]):
     """Poll the analyzer's cached state without opening another Modbus session."""
 
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
-        self.base_url = str(entry.data[CONF_URL]).rstrip("/")
+        scheme, saved_host, saved_port = split_analyzer_url(str(entry.data[CONF_URL]))
+        host = entry.options.get(CONF_HOST, entry.data.get(CONF_HOST, saved_host))
+        port = entry.options.get(CONF_PORT, entry.data.get(CONF_PORT, saved_port))
+        self.base_url = build_analyzer_url(str(host), int(port), scheme)
         interval = int(entry.options.get(
             CONF_SCAN_INTERVAL,
             entry.data.get(CONF_SCAN_INTERVAL, DEFAULT_LOCAL_SCAN_INTERVAL),

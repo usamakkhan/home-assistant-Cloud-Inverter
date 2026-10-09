@@ -15,7 +15,7 @@ from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api import CloudInverterAPI
-from .local_api import is_analyzer_config, normalize_analyzer_url
+from .local_api import build_analyzer_url, is_analyzer_config, split_analyzer_url
 from .const import (
     DOMAIN,
     CONF_USERNAME,
@@ -24,8 +24,11 @@ from .const import (
     SOURCE_CLOUD,
     SOURCE_LOCAL,
     CONF_URL,
+    CONF_HOST,
+    CONF_PORT,
     CONF_SCAN_INTERVAL,
-    DEFAULT_LOCAL_URL,
+    DEFAULT_LOCAL_HOST,
+    DEFAULT_LOCAL_PORT,
     DEFAULT_LOCAL_SCAN_INTERVAL,
     UPDATE_INTERVAL,
 )
@@ -106,9 +109,11 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors: dict[str, str] = {}
         if user_input is not None:
             try:
-                base_url = normalize_analyzer_url(str(user_input[CONF_URL]))
+                host = str(user_input[CONF_HOST]).strip()
+                port = int(user_input[CONF_PORT])
+                base_url = build_analyzer_url(host, port)
             except ValueError:
-                errors["base"] = "invalid_url"
+                errors["base"] = "invalid_host"
             else:
                 try:
                     session = async_get_clientsession(self.hass)
@@ -121,10 +126,12 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         await self.async_set_unique_id(f"local:{base_url.lower()}")
                         self._abort_if_unique_id_configured()
                         return self.async_create_entry(
-                            title=f"Cloud Inverter Local ({base_url})",
+                            title="Cloud Inverter Local",
                             data={
                                 CONF_SOURCE: SOURCE_LOCAL,
                                 CONF_URL: base_url,
+                                CONF_HOST: host,
+                                CONF_PORT: port,
                                 CONF_SCAN_INTERVAL: int(user_input[CONF_SCAN_INTERVAL]),
                             },
                         )
@@ -134,7 +141,9 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_show_form(
             step_id="local",
             data_schema=vol.Schema({
-                vol.Required(CONF_URL, default=(user_input or {}).get(CONF_URL, DEFAULT_LOCAL_URL)): str,
+                vol.Required(CONF_HOST, default=(user_input or {}).get(CONF_HOST, DEFAULT_LOCAL_HOST)): str,
+                vol.Required(CONF_PORT, default=(user_input or {}).get(CONF_PORT, DEFAULT_LOCAL_PORT)):
+                    vol.All(vol.Coerce(int), vol.Range(min=1, max=65535)),
                 vol.Required(
                     CONF_SCAN_INTERVAL,
                     default=(user_input or {}).get(CONF_SCAN_INTERVAL, DEFAULT_LOCAL_SCAN_INTERVAL),
@@ -303,22 +312,52 @@ class CloudInverterOptionsFlow(config_entries.OptionsFlowWithReload):
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
         """Show the interval field and reload the entry after a change."""
-        if user_input is not None:
-            return self.async_create_entry(data={
-                CONF_SCAN_INTERVAL: int(user_input[CONF_SCAN_INTERVAL]),
-            })
-
         local = self.config_entry.data.get(CONF_SOURCE) == SOURCE_LOCAL
+        errors: dict[str, str] = {}
+        if user_input is not None:
+            options = {CONF_SCAN_INTERVAL: int(user_input[CONF_SCAN_INTERVAL])}
+            if local:
+                try:
+                    scheme, _, _ = split_analyzer_url(self.config_entry.data[CONF_URL])
+                    host = str(user_input[CONF_HOST]).strip()
+                    port = int(user_input[CONF_PORT])
+                    base_url = build_analyzer_url(host, port, scheme)
+                except ValueError:
+                    errors["base"] = "invalid_host"
+                else:
+                    try:
+                        session = async_get_clientsession(self.hass)
+                        async with session.get(f"{base_url}/api/config", timeout=10) as response:
+                            response.raise_for_status()
+                            config = await response.json()
+                        if not is_analyzer_config(config):
+                            errors["base"] = "invalid_response"
+                        else:
+                            options.update({CONF_HOST: host, CONF_PORT: port})
+                    except (ClientError, TimeoutError, ValueError):
+                        errors["base"] = "cannot_connect_local"
+            if not errors:
+                return self.async_create_entry(data=options)
+
         default = DEFAULT_LOCAL_SCAN_INTERVAL if local else UPDATE_INTERVAL
         current = self.config_entry.options.get(
             CONF_SCAN_INTERVAL,
             self.config_entry.data.get(CONF_SCAN_INTERVAL, default),
         )
+        fields = {}
+        if local:
+            _, saved_host, saved_port = split_analyzer_url(self.config_entry.data[CONF_URL])
+            fields[vol.Required(CONF_HOST, default=(user_input or {}).get(
+                CONF_HOST, self.config_entry.options.get(CONF_HOST, self.config_entry.data.get(CONF_HOST, saved_host))
+            ))] = str
+            fields[vol.Required(CONF_PORT, default=(user_input or {}).get(
+                CONF_PORT, self.config_entry.options.get(CONF_PORT, self.config_entry.data.get(CONF_PORT, saved_port))
+            ))] = vol.All(vol.Coerce(int), vol.Range(min=1, max=65535))
+        fields[vol.Required(CONF_SCAN_INTERVAL, default=(user_input or {}).get(CONF_SCAN_INTERVAL, current))] = vol.All(
+            vol.Coerce(int), vol.Range(min=10 if local else UPDATE_INTERVAL, max=900)
+        )
         return self.async_show_form(
             step_id="init",
-            data_schema=vol.Schema({
-                vol.Required(CONF_SCAN_INTERVAL, default=current): vol.All(
-                    vol.Coerce(int), vol.Range(min=10 if local else UPDATE_INTERVAL, max=900)
-                ),
-            }),
+            data_schema=vol.Schema(fields),
+            errors=errors,
         )
