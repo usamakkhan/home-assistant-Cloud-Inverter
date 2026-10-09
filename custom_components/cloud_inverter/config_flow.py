@@ -4,15 +4,29 @@ from __future__ import annotations
 import logging
 from typing import Any
 
+from aiohttp import ClientError
 import voluptuous as vol
 
 from homeassistant import config_entries
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.exceptions import HomeAssistantError
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api import CloudInverterAPI
-from .const import DOMAIN, CONF_USERNAME, CONF_PASSWORD
+from .local_api import is_analyzer_config, normalize_analyzer_url
+from .const import (
+    DOMAIN,
+    CONF_USERNAME,
+    CONF_PASSWORD,
+    CONF_SOURCE,
+    SOURCE_CLOUD,
+    SOURCE_LOCAL,
+    CONF_URL,
+    CONF_SCAN_INTERVAL,
+    DEFAULT_LOCAL_URL,
+    DEFAULT_LOCAL_SCAN_INTERVAL,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -59,6 +73,69 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self.inverters = []
 
     async def async_step_user(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Choose between the portal and a local analyzer."""
+        if user_input is not None:
+            if user_input[CONF_SOURCE] == SOURCE_LOCAL:
+                return await self.async_step_local()
+            return await self.async_step_cloud()
+
+        return self.async_show_form(
+            step_id="user",
+            data_schema=vol.Schema({
+                vol.Required(CONF_SOURCE, default=SOURCE_LOCAL): vol.In({
+                    SOURCE_LOCAL: "Local analyzer (no cloud login)",
+                    SOURCE_CLOUD: "CloudInverter.net",
+                }),
+            }),
+        )
+
+    async def async_step_local(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Connect to the local analyzer's cached HTTP API."""
+        errors: dict[str, str] = {}
+        if user_input is not None:
+            try:
+                base_url = normalize_analyzer_url(str(user_input[CONF_URL]))
+            except ValueError:
+                errors["base"] = "invalid_url"
+            else:
+                try:
+                    session = async_get_clientsession(self.hass)
+                    async with session.get(f"{base_url}/api/config", timeout=10) as response:
+                        response.raise_for_status()
+                        config = await response.json()
+                    if not is_analyzer_config(config):
+                        errors["base"] = "invalid_response"
+                    else:
+                        await self.async_set_unique_id(f"local:{base_url.lower()}")
+                        self._abort_if_unique_id_configured()
+                        return self.async_create_entry(
+                            title=f"Cloud Inverter Local ({base_url})",
+                            data={
+                                CONF_SOURCE: SOURCE_LOCAL,
+                                CONF_URL: base_url,
+                                CONF_SCAN_INTERVAL: int(user_input[CONF_SCAN_INTERVAL]),
+                            },
+                        )
+                except (ClientError, TimeoutError, ValueError):
+                    errors["base"] = "cannot_connect_local"
+
+        return self.async_show_form(
+            step_id="local",
+            data_schema=vol.Schema({
+                vol.Required(CONF_URL, default=(user_input or {}).get(CONF_URL, DEFAULT_LOCAL_URL)): str,
+                vol.Required(
+                    CONF_SCAN_INTERVAL,
+                    default=(user_input or {}).get(CONF_SCAN_INTERVAL, DEFAULT_LOCAL_SCAN_INTERVAL),
+                ): vol.All(vol.Coerce(int), vol.Range(min=10, max=900)),
+            }),
+            errors=errors,
+        )
+
+    async def async_step_cloud(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
         """Handle the initial step - username and password."""
@@ -124,7 +201,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     self.api = None
 
         return self.async_show_form(
-            step_id="user", 
+            step_id="cloud",
             data_schema=STEP_USER_DATA_SCHEMA, 
             errors=errors,
             description_placeholders={
@@ -190,6 +267,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_create_entry(
             title=title,
             data={
+                CONF_SOURCE: SOURCE_CLOUD,
                 CONF_USERNAME: self.username,
                 CONF_PASSWORD: self.password,
                 "goods_id": goods_id,

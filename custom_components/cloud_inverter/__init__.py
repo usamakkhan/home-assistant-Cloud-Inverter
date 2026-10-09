@@ -7,7 +7,8 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 
-from .const import DOMAIN, CONF_GOODS_ID
+from .const import DOMAIN, CONF_GOODS_ID, CONF_SOURCE, SOURCE_CLOUD, SOURCE_LOCAL
+from .local_coordinator import SolarMaxCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -19,11 +20,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data.setdefault(DOMAIN, {})
     
     # Keep only the selected inverter reference in integration state.
-    hass.data[DOMAIN][entry.entry_id] = {
-        "goods_id": entry.data.get(CONF_GOODS_ID),
-    }
+    source = entry.data.get(CONF_SOURCE, SOURCE_CLOUD)
+    if source == SOURCE_LOCAL:
+        coordinator = SolarMaxCoordinator(hass, entry)
+        await coordinator.async_config_entry_first_refresh()
+        entry.runtime_data = coordinator
+    hass.data[DOMAIN][entry.entry_id] = {"goods_id": entry.data.get(CONF_GOODS_ID)}
     
-    _LOGGER.info("Setting up Cloud Inverter integration")
+    _LOGGER.info("Setting up Cloud Inverter %s integration", source)
     
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     

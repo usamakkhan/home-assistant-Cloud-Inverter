@@ -26,8 +26,9 @@ safe read cycle and both the local GUI and Home Assistant consume its cache.
 - Find the inverter's LAN IP and the analyzer computer's LAN IP. Replace
   `INVERTER_LAN_IP` and `ANALYZER_LAN_IP` below with those two different values.
   The `192.168.50.x` addresses in the sample files are examples.
-- Install only the `custom_components/solarmax_pv9000` folder in Home Assistant.
-  The analyzer itself runs on the other computer, not inside that integration.
+- The analyzer itself runs on the other computer. Home Assistant can use the
+  **Cloud Inverter** integration's Local analyzer option or the standalone
+  connector in this folder. Choose one to avoid duplicate entities.
 
 ## 1. Run the analyzer as a LAN service
 
@@ -57,7 +58,18 @@ allow a few minutes; cloud quiet windows can extend the gap. Missing readings
 remain missing instead of being replaced with sample values. Leave inverter
 controls disabled when adding the connector; its setup checks for read-only mode.
 
-## 2. Install the custom integration (recommended)
+## 2. Add it through the Cloud Inverter integration (recommended)
+
+If you installed **Cloud Inverter** through HACS or copied
+`custom_components/cloud_inverter` into Home Assistant, restart Home Assistant,
+then open **Settings → Devices & services → Add integration**. Search for
+**Cloud Inverter**, choose **Local analyzer**, and enter
+`http://ANALYZER_LAN_IP:8765` with the default 180-second cache scan interval.
+No CloudInverter.net username or password is required. The URL is the analyzer
+base URL; do not append `/api/ha`. After setup, check the new device's sensors
+after the first successful analyzer capture.
+
+## 3. Standalone connector (alternative)
 
 1. Open Home Assistant's `/config` directory using its file editor, Samba share,
    SSH, or another file transfer method. Create `custom_components` if needed.
@@ -113,7 +125,7 @@ entity IDs; select the generated entities in the card editor if needed.
   Original/cloud-only mode, then try Cooperative mode at 180 seconds. Avoid
   10-second direct polling on the reported installation.
 
-## 3. REST fallback
+## 4. REST fallback
 
 If you do not want a custom component, replace `ANALYZER_IP` in
 `solarmax_rest_package.yaml`, place it under `/config/packages`, enable packages

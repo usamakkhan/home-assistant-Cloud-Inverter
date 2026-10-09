@@ -2,29 +2,47 @@
   "config": {
     "step": {
       "user": {
-        "title": "Cloud Inverter Setup",
-        "description": "Enter your CloudInverter.net login credentials.\n\nYou can find these at: https://www.cloudinverter.net",
         "data": {
-          "username": "Username (Member ID)",
-          "password": "Password"
-        }
+          "source": "Data source"
+        },
+        "title": "Cloud Inverter Setup",
+        "description": "Choose where Home Assistant should read inverter data."
       },
       "select_inverter": {
         "title": "Select Your Inverter",
-        "description": "Multiple inverters found. Please select which one to monitor.\n\nNote: The ID shown (e.g., 2409-44470087PH) matches the serial number printed on your inverter device.",
+        "description": "Multiple inverters found. Please select which one to monitor.\n\nNote: The ID shown (e.g., ABCDE123456789) matches the serial number printed on your inverter device.",
         "data": {
           "inverter": "Inverter"
         }
+      },
+      "cloud": {
+        "data": {
+          "password": "Password",
+          "username": "Username (Member ID)"
+        },
+        "title": "CloudInverter.net Login",
+        "description": "Enter your CloudInverter.net login credentials."
+      },
+      "local": {
+        "data": {
+          "url": "Analyzer URL",
+          "scan_interval": "Cache scan interval (seconds)"
+        },
+        "title": "Local Analyzer",
+        "description": "Run the SolarMax local analyzer on your LAN first. Enter its base URL, for example http://192.168.50.20:8765. Home Assistant reads its cached data; it does not poll the inverter directly."
       }
     },
     "error": {
       "cannot_connect": "Failed to connect to Cloud Inverter API. Please check your internet connection and try again.",
       "invalid_auth": "Invalid username or password. Please check your credentials and try again.",
       "no_inverters": "No inverters found in your account. Please add an inverter to your CloudInverter.net account first.",
-      "unknown": "An unexpected error occurred. Please check the logs and try again."
+      "unknown": "An unexpected error occurred. Please check the logs and try again.",
+      "invalid_url": "Enter the analyzer base URL with http:// or https:// and an explicit port, without /api/ha.",
+      "invalid_response": "The URL did not return a SolarMax analyzer configuration.",
+      "cannot_connect_local": "Cannot reach the local analyzer. Check its URL, LAN connection, and port 8765."
     },
     "abort": {
-      "already_configured": "This inverter is already configured. Each inverter can only be added once."
+      "already_configured": "This source is already configured."
     }
   }
 }

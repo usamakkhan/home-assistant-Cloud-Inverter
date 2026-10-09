@@ -19,6 +19,13 @@ CONF_PASSWORD = "password"
 CONF_GOODS_ID = "goods_id"
 CONF_MEMBER_AUTO_ID = "member_auto_id"
 CONF_TOKEN = "token"
+CONF_SOURCE = "source"
+SOURCE_CLOUD = "cloud"
+SOURCE_LOCAL = "local"
+CONF_URL = "url"
+CONF_SCAN_INTERVAL = "scan_interval"
+DEFAULT_LOCAL_URL = "http://192.168.50.20:8765"
+DEFAULT_LOCAL_SCAN_INTERVAL = 180
 
 # Update interval (in seconds)
 UPDATE_INTERVAL = 30

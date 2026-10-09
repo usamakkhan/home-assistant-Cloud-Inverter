@@ -34,6 +34,8 @@ from .const import (
     UPDATE_INTERVAL,
     CONF_USERNAME,
     CONF_PASSWORD,
+    CONF_SOURCE,
+    SOURCE_LOCAL,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -45,6 +47,12 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up Cloud Inverter sensors."""
+    if entry.data.get(CONF_SOURCE) == SOURCE_LOCAL:
+        from .local_sensor import async_setup_entry as async_setup_local_sensors
+
+        await async_setup_local_sensors(hass, entry, async_add_entities)
+        return
+
     username = entry.data[CONF_USERNAME]
     password = entry.data[CONF_PASSWORD]
     goods_id = entry.data.get("goods_id")  # Get the selected inverter ID

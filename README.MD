@@ -4,14 +4,22 @@ A Home Assistant integration for monitoring Cloud Inverter (SenergyTec) solar sy
 
 ## Local analyzer and Home Assistant connector
 
-For local collection without a CloudInverter login, see the separate
-[SolarMax local analyzer](local_analyzer/README.md). Its
-[Home Assistant setup guide](local_analyzer/home_assistant/README.md) explains
-how to run the analyzer on your LAN and install its read-only connector. The
-local analyzer uses a 180-second collection preset and example network and
-serial values; enter your own inverter LAN address before enabling collection.
+This integration now offers two sources during setup:
 
-The Cloud Inverter integration documented below remains the cloud-login option.
+- **CloudInverter.net:** sign in with your cloud account as described below.
+- **Local analyzer:** run the [SolarMax local analyzer](local_analyzer/README.md)
+  on a computer that can reach the inverter. Follow its
+  [LAN setup steps](local_analyzer/home_assistant/README.md#1-run-the-analyzer-as-a-lan-service),
+  then choose **Local analyzer** when adding **Cloud Inverter** in Home Assistant.
+  Enter the analyzer base URL, for example `http://192.168.50.20:8765`, and
+  keep the 180-second cache scan default. No CloudInverter login is needed.
+
+The local option reads the analyzer's cached `/api/ha` feed. It does not make
+another Modbus connection to the inverter. Enter your own LAN addresses; the
+repository uses sample IPs and `ABCDE123456789` in place of a real serial.
+The standalone local connector under `local_analyzer/home_assistant` remains
+available for manual installation; install one connector per analyzer to avoid
+duplicate entities.
 
 > Inspired by [DESS Monitor Integration](https://github.com/Antoxa1081/home-assistant-dess-monitor), designed specifically for Cloud Inverter systems.
 
@@ -68,11 +76,11 @@ The Cloud Inverter integration documented below remains the cloud-login option.
 
 1. Go to Settings → Devices & Services → Integrations
 2. Click Create Integration → Search for **"Cloud Inverter"**
-3. Enter your credentials:
-   - Username**: Your CloudInverter.net username
-   - Password**: Your CloudInverter.net password
-4. Select your inverter from the list
-5. Complete setup
+3. Choose **CloudInverter.net** or **Local analyzer**.
+4. For cloud, enter your username and password, then select your inverter.
+   For local, enter the analyzer URL and cache scan interval (180 seconds by
+   default). See the local analyzer instructions above before choosing local.
+5. Complete setup.
 
 That's it! The integration will automatically create sensors for all your inverter data.
 
