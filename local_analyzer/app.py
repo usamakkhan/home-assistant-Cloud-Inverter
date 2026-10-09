@@ -204,7 +204,14 @@ class Handler(BaseHTTPRequestHandler):
             self._json(200, {"count": len(events), "events": events})
             return
         if path == "/api/ha":
-            payload = TELEMETRY_HISTORY.home_assistant_payload()
+            collector_status = self.server.collector.status()
+            # Allow a skipped cooperative cloud window and one missed target
+            # without hiding valid telemetry immediately.
+            max_age = (
+                max(180, 2 * collector_status["interval_seconds"] + 90)
+                if collector_status["background_polling"] else 180
+            )
+            payload = TELEMETRY_HISTORY.home_assistant_payload(max_age_seconds=max_age)
             if payload is None:
                 self._json(503, {"available": False, "error": "no telemetry captured yet"})
             else:

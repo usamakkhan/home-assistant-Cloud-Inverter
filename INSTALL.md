@@ -98,14 +98,16 @@ LAN bridge and you do not need the separate analyzer dashboard or history.
    Cloud Inverter** and choose **Direct inverter LAN**.
 3. Enter the inverter's IP in **Inverter LAN IP**. Use an IP address such as
    `192.168.50.10`, not a URL or the analyzer's IP.
-4. Leave **Inverter Modbus/TCP port** at **502** unless your bridge uses
-   another port. Leave **Inverter collection interval** at **180 seconds**.
+4. Leave **Inverter Modbus/TCP port** at **502** and **Modbus unit ID** at **1**
+   unless your bridge uses different values. Leave **Inverter collection
+   interval** at **180 seconds**.
 5. Finish setup. Home Assistant performs a read-only capture and creates the
    local sensors. The first capture can wait for a cloud quiet window.
 
 The integration performs the read itself inside Home Assistant's executor;
 there is no separate Python command, analyzer server, or open HTTP port.
-Its capture interval is adjustable from **10–900 seconds** in **Options**.
+Its capture interval, IP, port, and unit ID can be changed in **Options**;
+the interval allows **10–900 seconds**.
 It avoids heuristic quiet windows around the vendor's five-minute upload
 cycle, so the actual time between captures can exceed the selected interval.
 These windows are a precaution, not a guarantee that the vendor cloud upload
@@ -236,6 +238,7 @@ directory when replacing application files.
 | Cloud login fails | Confirm account credentials and portal availability; use sanitized logs to report the failing API status. |
 | Local setup cannot connect | Open `http://ANALYZER_IP:PORT/api/config` from the Home Assistant network. Check Host, Port, bind address, process, and firewall. |
 | Direct setup cannot connect | Check the inverter LAN IP and Modbus/TCP port from the Home Assistant network. Direct mode does not use the analyzer HTTP port. |
+| Direct connection works but sensors are unavailable | Confirm the Modbus unit ID (default 1) and that the inverter supports the PV9000 holding-register profile. |
 | Direct sensors become unavailable | Check Home Assistant logs for a Modbus read error and verify the inverter bridge is reachable; quiet windows can delay updates. |
 | `/api/ha` is HTTP 503 | Wait for a successful analyzer capture; check inverter IP and collector mode. |
 | Local sensors are unavailable or old | Check `/api/ha`, the analyzer dashboard's capture time, and whether its process is still running. |

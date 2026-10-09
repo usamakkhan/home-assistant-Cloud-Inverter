@@ -515,7 +515,8 @@ def read_profile_snapshot(
         if address not in covered and value != 0
     ]
     return {
-        "ok": all(block["ok"] for block in raw_blocks),
+        "ok": bool(register_map),
+        "complete": all(block["ok"] for block in raw_blocks),
         "captured_at": datetime.now(timezone.utc).isoformat(),
         "host": host,
         "unit_id": unit_id,

@@ -19,7 +19,8 @@ response; it does not open another Modbus connection. Existing cloud entries
 continue to use the cloud source.
 
 **Direct inverter LAN** runs the read-only PV9000 capture inside Home
-Assistant. Enter the inverter's LAN IP and Modbus/TCP port (default 502).
+Assistant. Enter the inverter's LAN IP, Modbus/TCP port (default 502), and
+Modbus unit ID (default 1).
 The integration spaces captures at 180 seconds by default and avoids
 heuristic cloud upload windows. It requires Home Assistant to reach the
 inverter directly. The separate analyzer remains available if you want its

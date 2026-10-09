@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.3.1 — 2026-10-09
+
+- Keep valid local sensors available when one optional PV9000 register block
+  cannot be read, while marking that capture as incomplete.
+- Allow the separate analyzer's Home Assistant cache to remain available
+  through normal cooperative quiet windows; stale or undated samples still
+  become unavailable.
+- Add a configurable Modbus unit ID to direct Home Assistant setup and
+  Options. The default remains 1, with existing device identities preserved.
+- Make direct LAN collection the default setup choice.
+- Add regression tests and restore push/PR validation in GitHub Actions.
+
 ## 1.3.0 — 2026-10-09
 
 - Add **Direct inverter LAN** as a third Cloud Inverter source. Home

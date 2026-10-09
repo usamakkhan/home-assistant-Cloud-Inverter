@@ -36,6 +36,7 @@
         "data": {
           "host": "Inverter LAN IP",
           "port": "Inverter Modbus/TCP port",
+          "unit_id": "Modbus unit ID",
           "scan_interval": "Inverter collection interval (seconds)"
         },
         "title": "Direct SolarMax PV9000",
@@ -63,8 +64,9 @@
       "init": {
         "data": {
           "scan_interval": "Refresh interval (seconds)",
-          "host": "Analyzer host or IP",
-          "port": "Analyzer port"
+          "host": "Host or IP",
+          "port": "TCP port",
+          "unit_id": "Modbus unit ID"
         },
         "description": "Change the host, port, or refresh interval. For direct mode, the interval controls inverter collection; for analyzer mode, it controls cache reads.",
         "title": "Refresh interval"

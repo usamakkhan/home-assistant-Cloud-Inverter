@@ -11,7 +11,10 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .const import CONF_HOST, CONF_PORT, CONF_SCAN_INTERVAL, DEFAULT_LOCAL_SCAN_INTERVAL, DOMAIN
+from .const import (
+    CONF_HOST, CONF_PORT, CONF_UNIT_ID, CONF_SCAN_INTERVAL,
+    DEFAULT_DIRECT_UNIT_ID, DEFAULT_LOCAL_SCAN_INTERVAL, DOMAIN,
+)
 from .direct_profile.ha import seconds_until_safe_window, snapshot_payload
 from .direct_profile.profile import read_profile_snapshot
 
@@ -24,6 +27,9 @@ class DirectSolarMaxCoordinator(DataUpdateCoordinator[dict]):
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
         self.host = str(entry.options.get(CONF_HOST, entry.data[CONF_HOST]))
         self.port = int(entry.options.get(CONF_PORT, entry.data[CONF_PORT]))
+        self.unit_id = int(entry.options.get(
+            CONF_UNIT_ID, entry.data.get(CONF_UNIT_ID, DEFAULT_DIRECT_UNIT_ID)
+        ))
         interval = int(entry.options.get(
             CONF_SCAN_INTERVAL, entry.data.get(CONF_SCAN_INTERVAL, DEFAULT_LOCAL_SCAN_INTERVAL)
         ))
@@ -46,7 +52,7 @@ class DirectSolarMaxCoordinator(DataUpdateCoordinator[dict]):
                 snapshot = await self.hass.async_add_executor_job(
                     read_profile_snapshot,
                     self.host,
-                    1,
+                    self.unit_id,
                     4,
                     1.0,
                     self._metadata_cache,

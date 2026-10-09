@@ -17,13 +17,12 @@ ha_helpers = importlib.import_module("cloud_inverter.direct_profile.ha")
 
 
 class FakeResult:
-    ok = True
-
-    def __init__(self, count):
-        self.registers = [0] * count
+    def __init__(self, count, ok=True):
+        self.ok = ok
+        self.registers = [0] * count if ok else None
 
     def to_dict(self):
-        return {"ok": True, "interpretation": {"ascii": "PV9000"}}
+        return {"ok": self.ok, "interpretation": {"ascii": "PV9000"}}
 
 
 class FakeModbusClient:
@@ -42,6 +41,11 @@ class FakeModbusClient:
         return FakeResult(count)
 
 
+class PartialModbusClient(FakeModbusClient):
+    def read_holding_registers(self, address, count, unit_id):
+        return FakeResult(count, ok=address != 0x1300)
+
+
 class DirectProfileTests(unittest.TestCase):
     def test_capture_uses_configured_port_and_decodes_without_analyzer(self):
         FakeModbusClient.created.clear()
@@ -56,6 +60,15 @@ class DirectProfileTests(unittest.TestCase):
     def test_host_must_be_an_ip_literal(self):
         with self.assertRaises(ValueError):
             profile.read_profile_snapshot("http://192.168.50.10")
+
+    def test_one_missing_block_does_not_hide_all_other_sensors(self):
+        with patch.object(profile, "ModbusClient", PartialModbusClient), patch.object(
+            profile.time, "sleep"
+        ):
+            snapshot = profile.read_profile_snapshot("192.168.50.10")
+        self.assertTrue(snapshot["ok"])
+        self.assertFalse(snapshot["complete"])
+        self.assertIn("pv_power", snapshot["sensors"])
 
     def test_cloud_quiet_window_delays_boundary_captures(self):
         self.assertEqual(ha_helpers.seconds_until_safe_window(10), 36)

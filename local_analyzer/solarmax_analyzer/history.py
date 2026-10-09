@@ -487,7 +487,7 @@ class TelemetryHistory:
                 raise RuntimeError(f"telemetry latest-sample lookup failed: {exc}") from exc
             return None
 
-    def home_assistant_payload(self) -> dict[str, Any] | None:
+    def home_assistant_payload(self, max_age_seconds: int = 180) -> dict[str, Any] | None:
         snapshot = self.latest_snapshot()
         if snapshot is None:
             return None
@@ -513,10 +513,9 @@ class TelemetryHistory:
                 "active_flags": sensor.get("active_flags"),
             }
         return {
-            # Cooperative mode deliberately skips the vendor's five-minute
-            # upload window, so a healthy cache can briefly be older than one
-            # polling interval without representing a failed datalogger.
-            "available": bool(snapshot.get("ok")) and (age_seconds is None or age_seconds <= 180),
+            "available": bool(snapshot.get("ok")) and (
+                age_seconds is not None and age_seconds <= max_age_seconds
+            ),
             "captured_at": captured_at,
             "age_seconds": age_seconds,
             "model": snapshot.get("model"),

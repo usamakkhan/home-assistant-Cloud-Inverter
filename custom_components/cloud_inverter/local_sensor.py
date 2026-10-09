@@ -27,7 +27,11 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from .const import DOMAIN
 from .local_coordinator import SolarMaxCoordinator
 from .direct_coordinator import DirectSolarMaxCoordinator
-from .const import CONF_SOURCE, SOURCE_DIRECT
+from .direct_config import direct_unique_id
+from .const import (
+    CONF_HOST, CONF_PORT, CONF_SOURCE, CONF_UNIT_ID,
+    DEFAULT_DIRECT_UNIT_ID, SOURCE_DIRECT,
+)
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -168,10 +172,14 @@ class SolarMaxSensor(CoordinatorEntity[SolarMaxCoordinator], SensorEntity):
     def device_info(self) -> DeviceInfo:
         model = self.coordinator.data.get("model") or "PV9000"
         direct = self.entry.data.get(CONF_SOURCE) == SOURCE_DIRECT
-        identity = (
-            f"direct:{self.coordinator.host}:{self.coordinator.port}"
-            if direct else f"local:{self.coordinator.base_url}"
-        )
+        if direct:
+            # Keep the v1.3.0 device identity stable across option changes.
+            unit_id = int(self.entry.data.get(CONF_UNIT_ID, DEFAULT_DIRECT_UNIT_ID))
+            identity = direct_unique_id(
+                self.entry.data[CONF_HOST], self.entry.data[CONF_PORT], unit_id
+            )
+        else:
+            identity = f"local:{self.coordinator.base_url}"
         info = DeviceInfo(
             identifiers={(DOMAIN, identity)},
             name="Cloud Inverter Direct" if direct else "Cloud Inverter Local",

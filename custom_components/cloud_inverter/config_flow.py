@@ -2,8 +2,6 @@
 from __future__ import annotations
 
 import logging
-import asyncio
-import ipaddress
 from typing import Any
 
 from aiohttp import ClientError
@@ -17,6 +15,7 @@ from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api import CloudInverterAPI
+from .direct_config import direct_unique_id, parse_direct_settings, probe_direct_endpoint
 from .local_api import build_analyzer_url, is_analyzer_config, split_analyzer_url
 from .const import (
     DOMAIN,
@@ -29,10 +28,12 @@ from .const import (
     CONF_URL,
     CONF_HOST,
     CONF_PORT,
+    CONF_UNIT_ID,
     CONF_SCAN_INTERVAL,
     DEFAULT_LOCAL_HOST,
     DEFAULT_LOCAL_PORT,
     DEFAULT_DIRECT_PORT,
+    DEFAULT_DIRECT_UNIT_ID,
     DEFAULT_LOCAL_SCAN_INTERVAL,
     UPDATE_INTERVAL,
 )
@@ -101,9 +102,9 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_show_form(
             step_id="user",
             data_schema=vol.Schema({
-                vol.Required(CONF_SOURCE, default=SOURCE_LOCAL): vol.In({
-                    SOURCE_LOCAL: "Local analyzer (no cloud login)",
+                vol.Required(CONF_SOURCE, default=SOURCE_DIRECT): vol.In({
                     SOURCE_DIRECT: "Direct inverter LAN (runs in Home Assistant)",
+                    SOURCE_LOCAL: "Local analyzer (no cloud login)",
                     SOURCE_CLOUD: "CloudInverter.net",
                 }),
             }),
@@ -166,23 +167,18 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors: dict[str, str] = {}
         if user_input is not None:
             try:
-                host = str(ipaddress.ip_address(str(user_input[CONF_HOST]).strip()))
-                port = int(user_input[CONF_PORT])
-                if not 1 <= port <= 65535:
-                    raise ValueError("invalid port")
+                host, port, unit_id = parse_direct_settings(
+                    user_input[CONF_HOST], user_input[CONF_PORT], user_input[CONF_UNIT_ID]
+                )
             except ValueError:
                 errors["base"] = "invalid_direct_host"
             else:
                 try:
-                    reader, writer = await asyncio.wait_for(
-                        asyncio.open_connection(host, port), timeout=5
-                    )
-                    writer.close()
-                    await writer.wait_closed()
+                    await probe_direct_endpoint(host, port)
                 except (OSError, TimeoutError):
                     errors["base"] = "cannot_connect_direct"
                 else:
-                    await self.async_set_unique_id(f"direct:{host}:{port}")
+                    await self.async_set_unique_id(direct_unique_id(host, port, unit_id))
                     self._abort_if_unique_id_configured()
                     return self.async_create_entry(
                         title="Cloud Inverter Direct",
@@ -190,6 +186,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                             CONF_SOURCE: SOURCE_DIRECT,
                             CONF_HOST: host,
                             CONF_PORT: port,
+                            CONF_UNIT_ID: unit_id,
                             CONF_SCAN_INTERVAL: int(user_input[CONF_SCAN_INTERVAL]),
                         },
                     )
@@ -199,6 +196,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 vol.Required(CONF_HOST, default=(user_input or {}).get(CONF_HOST, "192.168.50.10")): str,
                 vol.Required(CONF_PORT, default=(user_input or {}).get(CONF_PORT, DEFAULT_DIRECT_PORT)):
                     vol.All(vol.Coerce(int), vol.Range(min=1, max=65535)),
+                vol.Required(CONF_UNIT_ID, default=(user_input or {}).get(CONF_UNIT_ID, DEFAULT_DIRECT_UNIT_ID)):
+                    vol.All(vol.Coerce(int), vol.Range(min=0, max=255)),
                 vol.Required(
                     CONF_SCAN_INTERVAL,
                     default=(user_input or {}).get(CONF_SCAN_INTERVAL, DEFAULT_LOCAL_SCAN_INTERVAL),
@@ -394,21 +393,18 @@ class CloudInverterOptionsFlow(config_entries.OptionsFlowWithReload):
                         errors["base"] = "cannot_connect_local"
             elif direct:
                 try:
-                    host = str(ipaddress.ip_address(str(user_input[CONF_HOST]).strip()))
-                    port = int(user_input[CONF_PORT])
+                    host, port, unit_id = parse_direct_settings(
+                        user_input[CONF_HOST], user_input[CONF_PORT], user_input[CONF_UNIT_ID]
+                    )
                 except ValueError:
                     errors["base"] = "invalid_direct_host"
                 else:
                     try:
-                        reader, writer = await asyncio.wait_for(
-                            asyncio.open_connection(host, port), timeout=5
-                        )
-                        writer.close()
-                        await writer.wait_closed()
+                        await probe_direct_endpoint(host, port)
                     except (OSError, TimeoutError):
                         errors["base"] = "cannot_connect_direct"
                     else:
-                        options.update({CONF_HOST: host, CONF_PORT: port})
+                        options.update({CONF_HOST: host, CONF_PORT: port, CONF_UNIT_ID: unit_id})
             if not errors:
                 return self.async_create_entry(data=options)
 
@@ -433,6 +429,11 @@ class CloudInverterOptionsFlow(config_entries.OptionsFlowWithReload):
             fields[vol.Required(CONF_PORT, default=(user_input or {}).get(
                 CONF_PORT, self.config_entry.options.get(CONF_PORT, self.config_entry.data[CONF_PORT])
             ))] = vol.All(vol.Coerce(int), vol.Range(min=1, max=65535))
+            fields[vol.Required(CONF_UNIT_ID, default=(user_input or {}).get(
+                CONF_UNIT_ID, self.config_entry.options.get(
+                    CONF_UNIT_ID, self.config_entry.data.get(CONF_UNIT_ID, DEFAULT_DIRECT_UNIT_ID)
+                )
+            ))] = vol.All(vol.Coerce(int), vol.Range(min=0, max=255))
         fields[vol.Required(CONF_SCAN_INTERVAL, default=(user_input or {}).get(CONF_SCAN_INTERVAL, current))] = vol.All(
             vol.Coerce(int), vol.Range(min=10 if (local or direct) else UPDATE_INTERVAL, max=900)
         )
