@@ -1,0 +1,22 @@
+{
+  "title": "SolarMax Local Cloud Connector",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect Home Assistant to SolarMax Local Cloud",
+        "description": "Enter the LAN URL of the separate SolarMax Local Cloud application. This connector reads only its cached API and never contacts inverter Modbus directly.",
+        "data": {
+          "url": "SolarMax Local Cloud URL",
+          "scan_interval": "Polling interval (seconds)"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Cannot connect to SolarMax Local Cloud",
+      "invalid_response": "The endpoint is not a compatible read-only SolarMax Local Cloud application"
+    },
+    "abort": {
+      "already_configured": "This SolarMax Local Cloud instance is already configured"
+    }
+  }
+}

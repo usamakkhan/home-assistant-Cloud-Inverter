@@ -2,6 +2,17 @@
 
 A Home Assistant integration for monitoring Cloud Inverter (SenergyTec) solar systems with real-time data updates.
 
+## Local analyzer and Home Assistant connector
+
+For local collection without a CloudInverter login, see the separate
+[SolarMax local analyzer](local_analyzer/README.md). Its
+[Home Assistant setup guide](local_analyzer/home_assistant/README.md) explains
+how to run the analyzer on your LAN and install its read-only connector. The
+local analyzer uses a 180-second collection preset and example network and
+serial values; enter your own inverter LAN address before enabling collection.
+
+The Cloud Inverter integration documented below remains the cloud-login option.
+
 > Inspired by [DESS Monitor Integration](https://github.com/Antoxa1081/home-assistant-dess-monitor), designed specifically for Cloud Inverter systems.
 
  Features

@@ -1,0 +1,54 @@
+title: SolarMax Local Cloud
+views:
+  - title: Solar
+    path: solarmax
+    icon: mdi:solar-power-variant
+    cards:
+      - type: markdown
+        content: |
+          # SolarMax Local Cloud
+          Home Assistant connector to the separate local CloudInverter replacement. Positive grid power is import; negative is feed-in. Negative battery power is charging.
+      - type: gauge
+        entity: sensor.solarmax_local_cloud_battery_state_of_charge
+        name: Battery SOC
+        min: 0
+        max: 100
+        severity:
+          red: 0
+          yellow: 25
+          green: 50
+      - type: entities
+        title: Live power flow
+        entities:
+          - sensor.solarmax_local_cloud_solar_power
+          - sensor.solarmax_local_cloud_grid_power
+          - sensor.solarmax_local_cloud_battery_power
+          - sensor.solarmax_local_cloud_backup_load_power
+          - sensor.solarmax_local_cloud_gen_smart_load_power
+          - sensor.solarmax_local_cloud_normal_load_power
+      - type: history-graph
+        title: Power history
+        hours_to_show: 6
+        entities:
+          - sensor.solarmax_local_cloud_solar_power
+          - sensor.solarmax_local_cloud_grid_power
+          - sensor.solarmax_local_cloud_battery_power
+          - sensor.solarmax_local_cloud_backup_load_power
+          - sensor.solarmax_local_cloud_gen_smart_load_power
+      - type: entities
+        title: Electrical and environmental
+        entities:
+          - sensor.solarmax_local_cloud_grid_voltage
+          - sensor.solarmax_local_cloud_grid_frequency
+          - sensor.solarmax_local_cloud_inverter_temperature
+          - sensor.solarmax_local_cloud_inverter_mode
+      - type: entities
+        title: Lifetime energy
+        entities:
+          - sensor.solarmax_local_cloud_solar_energy_total
+          - sensor.solarmax_local_cloud_grid_imported_energy_total
+          - sensor.solarmax_local_cloud_grid_exported_energy_total
+          - sensor.solarmax_local_cloud_battery_charged_energy_total
+          - sensor.solarmax_local_cloud_battery_discharged_energy_total
+          - sensor.solarmax_local_cloud_backup_load_energy_total
+          - sensor.solarmax_local_cloud_gen_smart_load_energy_total

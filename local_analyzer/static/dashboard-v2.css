@@ -1,0 +1,106 @@
+/* Visual layer only. Device collection policy lives in the backend. */
+:root { --bg:#080f19; --surface:#101d2d; --text:#e9f1f8; --muted:#91a4b9; --line-soft:#203247; --radius:18px; }
+body { background:#080f19; }
+.sidebar { background:#0b1420; }
+.brand strong { letter-spacing:-.035em; }
+.content { max-width:1720px; padding:26px 30px 50px; }
+.topbar { background:#0b1420f5; height:70px; }
+.page-head { margin-bottom:19px; }
+.page-head h1 { font-size:30px; }
+.page-head p { font-size:13px; max-width:760px; }
+.surface { background:#101c2b; box-shadow:0 8px 26px #00000016; }
+.surface-head h2 { letter-spacing:-.02em; }
+.heading-icon { display:inline-flex; vertical-align:middle; color:#8ab7d3; margin-right:9px; }
+.nav-item { margin:3px 0; }
+.nav-item.active { background:#16332f; box-shadow:inset 3px 0 #65d6b1; }
+.collector-panel { padding:15px 18px; margin-bottom:18px; background:#0f2426; border-color:#29483f; }
+.collector-panel>.surface-head { margin:0; align-items:center; }
+.collector-panel .surface-head p { max-width:750px; }
+.collector-actions { display:flex; align-items:center; gap:10px; flex-shrink:0; }
+.restore-button { white-space:nowrap; }
+.collector-panel details { margin-top:12px; background:#0c1c25; }
+.collector-panel details summary { font-size:12px; color:#abc6c8; }
+.collector-confirm { text-transform:none; letter-spacing:0; font-weight:500; line-height:1.6; }
+.collector-panel>.status { margin-top:9px; font-size:11px; }
+.collector-controls { grid-template-columns:1.3fr .8fr .8fr auto; }
+.collector-stat { background:#0d1a26; }
+.command-strip { background:transparent; border:0; padding:0; grid-template-columns:minmax(180px,260px) 85px 1fr auto; margin:0 0 18px; }
+.command-strip #autoBtn { justify-self:end; }
+.sample-stamp { color:var(--muted); font-size:12px; padding-left:10px; }
+.sample-stamp strong { display:block; color:#cfdee9; font-size:12px; }
+.telemetry-badge { display:inline-flex; align-items:center; gap:7px; color:#9aadc0; background:#172637; border:1px solid #2b3e52; border-radius:999px; padding:6px 10px; font-size:11px; white-space:nowrap; }
+.telemetry-badge.fresh { color:#78e2bd; background:#15372d; border-color:#275343; }
+.telemetry-badge.stale,.telemetry-badge.partial { color:#ffd284; background:#352b1b; border-color:#645030; }
+.metric-strip { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:12px; margin-bottom:18px; }
+#liveMetrics.metric-strip { grid-template-columns:repeat(6,minmax(0,1fr)); }
+.metric { border-radius:14px; padding:16px; background:#101c2b; min-height:112px; }
+.metric-label { justify-content:space-between; flex-direction:row-reverse; gap:10px; color:#a6b7c9; }
+.metric-icon { width:30px; height:30px; padding:6px; }
+.metric strong { font-size:25px; font-weight:650; font-variant-numeric:tabular-nums; margin-top:10px; overflow-wrap:anywhere; }
+.overview-grid { grid-template-columns:minmax(0,1fr) 290px; gap:18px; align-items:stretch; }
+.energy-hero { min-height:370px; }
+.energy-hero .surface-head { padding:20px 22px 0; }
+.energy-map-shell { padding:0 12px; background:radial-gradient(ellipse at center,#18373644,transparent 64%); }
+#energyFlowMap { min-height:0; min-width:0; width:100%; aspect-ratio:960/420; }
+.flow-track { fill:none; stroke:#263c4d; stroke-width:2; }
+.energy-link.idle { opacity:.2; }
+.energy-node { fill:#142333; stroke:#2b4154; stroke-width:1; }
+.energy-node.inverter { fill:#16372f; stroke:#397c64; }
+.flow-node-label { fill:#a1b5c7; font:11px Inter,system-ui,sans-serif; }
+.flow-node-value { font:650 19px Inter,system-ui,sans-serif; letter-spacing:-.5px; }
+.flow-section-label { fill:#738ca3; font:10px Inter,system-ui,sans-serif; letter-spacing:2px; }
+.flow-footer { display:flex; justify-content:space-between; gap:14px; padding:12px 22px 18px; color:#899eb3; font-size:11px; }
+.flow-key { display:flex; gap:8px; align-items:center; }
+.flow-key i { display:inline-block; width:24px; height:2px; border-top:2px dashed #73d9ba; }
+.installation-card { overflow:hidden; display:flex; flex-direction:column; }
+.installation-art { margin:0; position:relative; background:#0b1726; }
+.installation-art img { display:block; width:100%; aspect-ratio:3/2; object-fit:cover; }
+.art-caption { position:absolute; bottom:8px; right:10px; border-radius:5px; padding:3px 6px; color:#afc3d5; background:#0b1726db; font-size:9px; }
+.installation-info { padding:17px; }
+.installation-info h2 { margin:0 0 12px; font-size:16px; }
+.installation-info dl { margin:0; }
+.installation-info dl div { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #203247; font-size:11px; }
+.installation-info dt { color:#90a5b9; }
+.installation-info dd { color:#d3e3ef; margin:0; text-align:right; }
+.text-link { display:inline-flex; align-items:center; gap:7px; color:#7edebc; padding:12px 0 0; font-size:12px; text-decoration:none; }
+.circuit-section { margin-top:20px; }
+.circuit-section>.surface-head { margin-bottom:12px; }
+.circuit-section .flow-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+.flow-card { border-radius:14px; padding:17px; min-height:145px; border-top:2px solid var(--circuit-color,#35516d); }
+.flow-card .kind { font-size:11px; letter-spacing:.02em; color:#b0c2d1; }
+.flow-card .power { font-size:27px; font-weight:650; margin:12px 0 5px; color:var(--circuit-color,#edf6ff); font-variant-numeric:tabular-nums; }
+.flow-card .detail { font-size:11px; color:#8ea6bc; }
+.flow-card.zero { opacity:1; }
+.flow-card.missing .power { color:#6c8295; }
+.circuit-devices { display:flex; gap:7px; flex-wrap:wrap; margin-top:12px; }
+.circuit-devices span { display:inline-flex; align-items:center; gap:5px; padding:5px 7px; background:#172637; border-radius:6px; color:#a9baca; font-size:10px; }
+.circuit-devices .ui-icon { width:13px; height:13px; }
+.equipment-banner { display:grid; grid-template-columns:240px 1fr; align-items:center; overflow:hidden; margin-bottom:18px; }
+.equipment-banner figure { margin:0; position:relative; background:#0b1726; }
+.equipment-banner img { width:100%; display:block; aspect-ratio:3/2; object-fit:cover; }
+.equipment-copy { padding:20px 24px; }
+.equipment-copy h2 { margin:0 0 7px; font-size:19px; }
+.equipment-copy p { color:#9baec2; max-width:660px; }
+.equipment-tags { display:flex; flex-wrap:wrap; gap:8px; }
+.equipment-tags span { display:inline-flex; align-items:center; gap:6px; border:1px solid #304758; padding:5px 9px; border-radius:7px; color:#aed7cd; font-size:11px; }
+.empty-panel { text-align:center; padding:28px 20px; color:#92a7bc; }
+.empty-panel>.ui-icon { width:34px; height:34px; margin-bottom:9px; color:#7196b2; }
+.empty-panel h3 { color:#d6e5ef; font-size:15px; margin:5px 0; }
+.empty-panel p { font-size:12px; max-width:420px; margin:6px auto; }
+.table-scroll th { position:sticky; top:0; z-index:1; background:#101c2b; }
+tbody tr:hover { background:#18283a; }
+.chart-shell { background:linear-gradient(150deg,#132336,#0f1a28); }
+.series-legend label { border-radius:20px; padding:7px 10px; text-transform:none; letter-spacing:0; color:#b3c6d7; }
+.chart-line { animation:none; }
+.chart-last { animation:none; }
+#historyChart { min-height:280px; }
+.header-status-offline { color:#f9c574; }
+.collector-form-note { color:#e7c78d; font-size:11px; margin:8px 0 0; }
+@keyframes batteryToSource { from { transform:translate(720px,-134px); opacity:.3; } to { transform:translate(0,0); opacity:1; } }
+@keyframes batteryToDestination { from { transform:translate(-720px,134px); opacity:.3; } to { transform:translate(0,0); opacity:1; } }
+@media(min-width:1500px) { .circuit-section .flow-grid { grid-template-columns:repeat(6,minmax(0,1fr)); } }
+@media(max-width:1180px) { #liveMetrics.metric-strip { grid-template-columns:repeat(3,minmax(0,1fr)); } .overview-grid { grid-template-columns:minmax(0,1fr) 245px; } .collector-panel>.surface-head { flex-wrap:wrap; } }
+@media(max-width:1000px) { .overview-grid { grid-template-columns:1fr; } .installation-card { flex-direction:row; } .installation-art { width:40%; } .installation-art img { height:100%; object-fit:cover; } .installation-info { flex:1; } }
+@media(max-width:650px) { .content { padding:18px 12px 45px; } .page-head h1 { font-size:25px; } .collector-controls { grid-template-columns:1fr 1fr; } .collector-controls>div:first-child { grid-column:1/-1; } .collector-actions { width:100%; justify-content:space-between; } #liveMetrics.metric-strip { grid-template-columns:repeat(2,minmax(0,1fr)); } .metric strong { font-size:22px; } .command-strip { grid-template-columns:1fr 70px; } .sample-stamp { padding-left:0; } .overview-grid { gap:12px; } #energyFlowMap { min-width:680px; } .energy-map-shell { overflow-x:auto; } .circuit-section .flow-grid { grid-template-columns:1fr 1fr; } .equipment-banner { grid-template-columns:130px 1fr; } .equipment-copy { padding:15px; } .equipment-tags { gap:5px; } .installation-art { width:44%; } .flow-footer { flex-wrap:wrap; } }
+@media(max-width:430px) { .circuit-section .flow-grid { grid-template-columns:1fr; } .equipment-banner { grid-template-columns:1fr; } .equipment-banner figure { max-height:170px; overflow:hidden; } .equipment-banner img { object-position:center; height:170px; } .flow-card { min-height:130px; } }
+@media(prefers-reduced-motion:reduce) { *,*::before,*::after { animation:none!important; scroll-behavior:auto!important; transition:none!important; } }
