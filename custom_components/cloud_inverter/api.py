@@ -76,17 +76,20 @@ class CloudInverterAPI:
                             _LOGGER.info("Successfully logged in to Cloud Inverter. Member ID: %s", self.member_auto_id)
                             return True
                         else:
-                            _LOGGER.error("Login failed: Invalid credentials or status")
+                            _LOGGER.error("Cloud Inverter login rejected (status: %s, code: %s)", data.get("status"), data.get("code"))
                             return False
                     else:
-                        _LOGGER.error("Login failed with status %s: %s", response.status, await response.text())
+                        _LOGGER.error("Cloud Inverter login HTTP status %s", response.status)
                         return False
                     
         except asyncio.TimeoutError:
             _LOGGER.error("Login timeout - could not connect to Cloud Inverter API")
             return False
-        except Exception as err:
-            _LOGGER.error("Error during login: %s", err)
+        except aiohttp.ClientError as err:
+            _LOGGER.error("Cloud Inverter login connection error: %s", type(err).__name__)
+            return False
+        except Exception:
+            _LOGGER.exception("Unexpected Cloud Inverter login error")
             return False
 
     async def get_member_data(self) -> dict[str, Any]:
@@ -286,13 +289,7 @@ class CloudInverterAPI:
                 _LOGGER.error("Test connection failed: Login unsuccessful")
                 return False
             
-            # Try to get group list to ensure full connection
-            groups = await self.get_group_list()
-            if not groups:
-                _LOGGER.error("Test connection failed: No inverter groups found")
-                return False
-            
-            _LOGGER.info("Connection test successful! Found %d inverter group(s)", len(groups))
+            _LOGGER.info("Cloud Inverter authentication succeeded")
             return True
             
         except Exception as err:
