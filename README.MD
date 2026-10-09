@@ -1,5 +1,7 @@
 # Cloud Inverter for Home Assistant
 
+<img src="custom_components/cloud_inverter/brand/icon.png" alt="Cloud Inverter solar panel icon" width="112">
+
 A Home Assistant sensor integration with three data sources:
 
 **New installation?** Follow the [detailed installation guide](INSTALL.md)
@@ -38,6 +40,11 @@ dashboard and history.
 - [Home Assistant local setup guide](local_analyzer/home_assistant/README.md):
   LAN commands, integration steps, a standalone connector alternative, and a
   REST package.
+
+The integration ships [icon and logo assets](custom_components/cloud_inverter/brand)
+in its `brand/` directory. Home Assistant 2026.3 and newer can display these
+directly ([Home Assistant brand image documentation](https://developers.home-assistant.io/docs/core/integration/brand_images/));
+older Home Assistant versions may show a generic integration icon.
 
 Sensor coverage includes PV and MPPT readings, grid import/export, battery
 state and energy, load circuits, and inverter status. The local feed additionally

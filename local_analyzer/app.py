@@ -40,6 +40,7 @@ DASHBOARD_ASSETS = {
     "/assets/peer-dashboard.js": ("peer-dashboard.js", "application/javascript; charset=utf-8"),
     "/assets/home-energy-v1.png": ("assets/home-energy-v1.png", "image/png"),
     "/assets/inverter-kit-v1.png": ("assets/inverter-kit-v1.png", "image/png"),
+    "/assets/cloud-inverter-icon.png": ("assets/cloud-inverter-icon.png", "image/png"),
 }
 BIND_HOST = "127.0.0.1"
 BIND_PORT = 8765

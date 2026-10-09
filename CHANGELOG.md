@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.2 — 2026-10-09
+
+- Display the existing integration icon in the repository README.
+- Include a favicon for the separate local analyzer dashboard.
+- Document when Home Assistant can show bundled integration brand images.
+
 ## 1.3.1 — 2026-10-09
 
 - Keep valid local sensors available when one optional PV9000 register block
