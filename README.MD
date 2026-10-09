@@ -5,6 +5,7 @@ A Home Assistant sensor integration with three data sources:
 **New installation?** Follow the [detailed installation guide](INSTALL.md)
 for HACS or manual setup, cloud login, and the complete local analyzer path.
 See the [changelog](CHANGELOG.md) for release changes.
+The repository is available under the [MIT License](LICENSE).
 
 | Source | Where readings come from | Credentials | Default Home Assistant refresh |
 | --- | --- | --- | --- |

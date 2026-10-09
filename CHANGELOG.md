@@ -11,6 +11,8 @@
   Options. The default remains 1, with existing device identities preserved.
 - Make direct LAN collection the default setup choice.
 - Add regression tests and restore push/PR validation in GitHub Actions.
+- Add the MIT license and package existing icon and logo artwork in the
+  integration's `brand/` directory for Home Assistant and HACS validation.
 
 ## 1.3.0 — 2026-10-09
 
