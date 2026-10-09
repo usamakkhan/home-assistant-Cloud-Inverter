@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.5.0 — 2026-10-09
+
+- License this release under the **PolyForm Strict License 1.0.0**. The new
+  terms permit noncommercial use but do not permit redistribution or modified
+  versions without separate permission from the copyright holder.
+- Update README license information and badge. Earlier releases under MIT
+  retain their original terms; this change does not alter those grants.
+- No integration behavior or existing Home Assistant entity IDs change.
+
 ## 1.4.3 — 2026-10-09
 
 - Give each CloudInverter.net inverter its own sensor unique IDs, so multiple

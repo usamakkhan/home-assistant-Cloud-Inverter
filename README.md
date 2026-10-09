@@ -4,7 +4,7 @@
 
 <p align="center">
   <a href="https://github.com/usamakkhan/home-assistant-Cloud-Inverter/releases"><img alt="Release" src="https://img.shields.io/github/v/release/usamakkhan/home-assistant-Cloud-Inverter?color=blue"></a>
-  <a href="https://github.com/usamakkhan/home-assistant-Cloud-Inverter/blob/main/LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-green"></a>
+  <a href="https://github.com/usamakkhan/home-assistant-Cloud-Inverter/blob/main/LICENSE"><img alt="PolyForm Strict license" src="https://img.shields.io/badge/license-PolyForm%20Strict-orange"></a>
   <a href="https://github.com/usamakkhan/home-assistant-Cloud-Inverter/actions"><img alt="Validation" src="https://img.shields.io/github/actions/workflow/status/usamakkhan/home-assistant-Cloud-Inverter/hacs-validation.yml?branch=main&label=validation"></a>
 </p>
 
@@ -14,6 +14,9 @@ Read SolarMax/Senergy inverter telemetry in Home Assistant through **one of two 
 - ☁️ **CloudInverter.net:** Home Assistant reads the vendor's HTTPS API using your portal account.
 
 The integration creates sensor entities for available measurements. It does not provide inverter setting controls. Supported readings vary with device, firmware, and selected source.
+
+> [!NOTE]
+> **License from v1.5.0:** [PolyForm Strict License 1.0.0](https://github.com/usamakkhan/home-assistant-Cloud-Inverter/blob/main/LICENSE). It permits noncommercial use but does not grant permission to redistribute the integration, sell copies, or publish modified versions. Copyright © 2026 Usama Khan. Earlier versions released under MIT retain their original license terms.
 
 > [!IMPORTANT]
 > On the installation reported by the project owner, the **inverter uploads data to CloudInverter.net about every five minutes**. A Home Assistant cloud refresh can happen more often, but it may receive the **same uploaded reading** until the inverter sends its next update. The integration does not control the inverter's upload schedule.
@@ -152,4 +155,4 @@ Remove or redact passwords, tokens, account IDs, serials, MAC addresses, and pri
 
 - Run the integration tests with `python -m unittest discover -s tests -v`. They cover signing, URL validation, direct Modbus checks, capture behavior, and freshness logic; they do not replace a real inverter and Home Assistant test.
 - Review release changes in the [changelog](https://github.com/usamakkhan/home-assistant-Cloud-Inverter/blob/main/CHANGELOG.md) and report reproducible problems through [GitHub Issues](https://github.com/usamakkhan/home-assistant-Cloud-Inverter/issues), using sanitized details.
-- This repository uses the [MIT License](https://github.com/usamakkhan/home-assistant-Cloud-Inverter/blob/main/LICENSE). Bundled integration icons live in [`brand/`](https://github.com/usamakkhan/home-assistant-Cloud-Inverter/tree/main/custom_components/cloud_inverter/brand); [Home Assistant's brand image guidance](https://developers.home-assistant.io/docs/core/integration/brand_images/) explains how Home Assistant displays integration assets.
+- Versions from v1.5.0 use the [PolyForm Strict License 1.0.0](https://github.com/usamakkhan/home-assistant-Cloud-Inverter/blob/main/LICENSE). For redistribution or commercial licensing, contact the copyright holder. Bundled integration icons live in [`brand/`](https://github.com/usamakkhan/home-assistant-Cloud-Inverter/tree/main/custom_components/cloud_inverter/brand); [Home Assistant's brand image guidance](https://developers.home-assistant.io/docs/core/integration/brand_images/) explains how Home Assistant displays integration assets.
