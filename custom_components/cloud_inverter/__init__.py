@@ -18,17 +18,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Cloud Inverter from a config entry."""
     hass.data.setdefault(DOMAIN, {})
     
-    # Store the full config entry data
+    # Keep only the selected inverter reference in integration state.
     hass.data[DOMAIN][entry.entry_id] = {
-        "config": entry.data,
         "goods_id": entry.data.get(CONF_GOODS_ID),
     }
     
-    _LOGGER.info(
-        "Setting up Cloud Inverter integration for inverter: %s (Model: %s)",
-        entry.data.get(CONF_GOODS_ID, "Unknown"),
-        entry.data.get("model", "Unknown"),
-    )
+    _LOGGER.info("Setting up Cloud Inverter integration")
     
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     
@@ -39,8 +34,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
     if unload_ok := await hass.config_entries.async_unload_platforms(entry, PLATFORMS):
         hass.data[DOMAIN].pop(entry.entry_id)
-        _LOGGER.info("Unloaded Cloud Inverter integration for inverter: %s", 
-                    entry.data.get(CONF_GOODS_ID, "Unknown"))
+        _LOGGER.info("Unloaded Cloud Inverter integration")
     
     return unload_ok
 

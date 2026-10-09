@@ -2,7 +2,11 @@
 import logging
 import aiohttp
 import asyncio
+import base64
 from typing import Any
+
+from cryptography.hazmat.primitives import padding
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
 from .const import (
     ENDPOINT_LOGIN,
@@ -15,11 +19,30 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
-# Default initial authorization token for login
-DEFAULT_AUTH_TOKEN = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJ3d3cuY2xvdWRpbnZlcnRlci5uZXQiLCJhdWQiOiJ3d3cuY2xvdWRpbnZlcnRlci5uZXQiLCJpYXQiOjE3NjA2Mjg2NTYsIm5iZiI6MTc2MDYyODY1NiwiZXhwIjoxNzkxNzMyNjU2LCJkYXRhIjp7Ik1lbWJlckF1dG9JRCI6bnVsbH19.YacN4_8qHUgWrlvkQqGvVdbHlTJwqsJ4_e7FMeUpfw0"
+# Public values used by the portal's request signer (umi.5294b0a9.js).
+_SIGN_KEY = b"05469137076236813460585715952089"
+_SIGN_IV = b"5161557162012237"
 
-# Default sign value (you may need to update this if it changes)
-DEFAULT_SIGN = "3kNFdvKEsLcyS6GsYUV/PeMKGj1Lkq05PA81+SG5Dljmx6KBvhhV7DhC8qrIPUX60AqLZQ0t8QbqUhVB9VW5oT+5iNwnvvkzDyqtAq03BKCRctLpzBbfaWlMYhgxCM/m"
+
+def sign_payload(payload: dict[str, Any]) -> str:
+    """Sign request fields in the same order and format as the portal client."""
+    fields = []
+    for key in sorted(payload):
+        value = payload[key]
+        if value is None or isinstance(value, bool) or value == "":
+            continue
+        text = "Array" if isinstance(value, list) else str(value)
+        fields.append(f"{key}={text}")
+    message = ("&".join(fields) + "&" + _SIGN_KEY.decode()).encode()
+    padder = padding.PKCS7(algorithms.AES.block_size).padder()
+    padded = padder.update(message) + padder.finalize()
+    encryptor = Cipher(algorithms.AES(_SIGN_KEY), modes.CBC(_SIGN_IV)).encryptor()
+    return base64.b64encode(encryptor.update(padded) + encryptor.finalize()).decode()
+
+
+def signed_payload(payload: dict[str, Any]) -> dict[str, Any]:
+    """Add a fresh signature without mutating the request fields."""
+    return {"sign": sign_payload(payload), **payload}
 
 
 class CloudInverterAPI:
@@ -53,17 +76,16 @@ class CloudInverterAPI:
             session = await self._get_session()
             
             # Prepare login payload
-            payload = {
+            payload = signed_payload({
                 "MemberID": self.username,
                 "Password": self.password,
                 "remember": True,
-                "sign": DEFAULT_SIGN,
                 "type": "1"
-            }
+            })
             
             headers = {
                 "Content-Type": "application/json",
-                "authorization": DEFAULT_AUTH_TOKEN
+                "Authorization": ""
             }
             
             async with asyncio.timeout(30):
@@ -73,10 +95,15 @@ class CloudInverterAPI:
                         if data.get("status") == "ok":
                             self.token = data.get("token")
                             self.member_auto_id = data.get("MemberAutoID")
-                            _LOGGER.info("Successfully logged in to Cloud Inverter. Member ID: %s", self.member_auto_id)
+                            _LOGGER.info("Successfully logged in to Cloud Inverter")
                             return True
                         else:
-                            _LOGGER.error("Cloud Inverter login rejected (status: %s, code: %s)", data.get("status"), data.get("code"))
+                            # Rejection may also indicate an outdated signature or token.
+                            _LOGGER.error(
+                                "Cloud Inverter login rejected (status: %s, code: %s)",
+                                data.get("status"),
+                                data.get("code"),
+                            )
                             return False
                     else:
                         _LOGGER.error("Cloud Inverter login HTTP status %s", response.status)
@@ -101,11 +128,10 @@ class CloudInverterAPI:
         try:
             session = await self._get_session()
             
-            payload = {
+            payload = signed_payload({
                 "MemberAutoID": self.member_auto_id,
                 "language": "en-US",
-                "sign": "eOQKIdmAVNdcrWOxOmktv3gP3dQRvRMn46atrTD1J5qi0f8u3Uh6bIfepeHSMfFR2Jkp6gyAN7nlartB83m1EAdHqus6LUID8Pu3z4463is="
-            }
+            })
             
             headers = {
                 "Content-Type": "application/json",
@@ -132,11 +158,10 @@ class CloudInverterAPI:
         try:
             session = await self._get_session()
             
-            payload = {
+            payload = signed_payload({
                 "MemberAutoID": self.member_auto_id,
                 "inputValue": "",
-                "sign": "eOQKIdmAVNdcrWOxOmktv5d2jIygN0ID/LcvUbmuSnboEVMSWqplaZ2btt8g/ywYDX3dt9LyGPyI8DxJPjYUsA=="
-            }
+            })
             
             headers = {
                 "Content-Type": "application/json",
@@ -148,14 +173,13 @@ class CloudInverterAPI:
                 async with session.post(ENDPOINT_GROUP_LIST, json=payload, headers=headers) as response:
                     if response.status == 200:
                         data = await response.json()
-                        _LOGGER.debug("Group list response: %s", data)
                         groups = data.get("AllGroupList", [])
+                        _LOGGER.debug("Group list contains %d groups", len(groups))
                         if groups and len(groups) > 0:
                             # Store the AutoID from the first group (this is GroupAutoID)
                             first_group = groups[0]
                             group_auto_id = str(first_group.get("AutoID"))
-                            _LOGGER.info("Found inverter group. GroupAutoID: %s, Type: %s", 
-                                       group_auto_id, first_group.get("GoodsTypeName"))
+                            _LOGGER.info("Found inverter group")
                             
                             # Now get the actual GoodsID from GroupDetailList
                             await self.get_group_detail(group_auto_id)
@@ -163,7 +187,7 @@ class CloudInverterAPI:
                             _LOGGER.warning("No inverter groups found in response")
                         return groups
                     else:
-                        _LOGGER.error("Failed to get group list (status %s): %s", response.status, await response.text())
+                        _LOGGER.error("Failed to get group list (HTTP %s)", response.status)
                         return []
                     
         except Exception as err:
@@ -179,11 +203,10 @@ class CloudInverterAPI:
         try:
             session = await self._get_session()
             
-            payload = {
+            payload = signed_payload({
                 "GroupAutoID": group_auto_id,
                 "MemberAutoID": self.member_auto_id,
-                "sign": "tDyCSCuluteR1nPEuG8r+5G5dS1tRE7Y9N8MBxtjT/COpmoSb41CA2nt5nUdU+b9UQ67ebapTeiZd0vXDwhllZd4ZWICEk6XJtRUHxyij3M="
-            }
+            })
             
             headers = {
                 "Content-Type": "application/json",
@@ -195,21 +218,20 @@ class CloudInverterAPI:
                 async with session.post(ENDPOINT_GROUP_DETAIL, json=payload, headers=headers) as response:
                     if response.status == 200:
                         data = await response.json()
-                        _LOGGER.debug("Group detail response: %s", data)
+                        _LOGGER.debug("Group detail response received")
                         
                         inverters = data.get("AllInverterList", [])
                         if inverters and len(inverters) > 0:
                             # Get the actual GoodsID (serial number) from the first inverter
                             first_inverter = inverters[0]
                             self.goods_id = first_inverter.get("GoodsID")
-                            _LOGGER.info("Found inverter GoodsID (Serial): %s, Model: %s", 
-                                       self.goods_id, first_inverter.get("ModelName"))
+                            _LOGGER.info("Found inverter in group detail")
                             return data
                         else:
                             _LOGGER.warning("No inverters found in group detail")
                             return {}
                     else:
-                        _LOGGER.error("Failed to get group detail (status %s): %s", response.status, await response.text())
+                        _LOGGER.error("Failed to get group detail (HTTP %s)", response.status)
                         return {}
                     
         except Exception as err:
@@ -245,13 +267,12 @@ class CloudInverterAPI:
                 "cookie": "timezone=Asia%2FKarachi"
             }
             
-            _LOGGER.debug("Requesting inverter data with GoodsID: %s", goods_id)
+            _LOGGER.debug("Requesting inverter data")
             
-            payload = {
+            payload = signed_payload({
                 "GoodsID": goods_id,
                 "MemberAutoID": self.member_auto_id,
-                "sign": "bA/YbB72GDQL6DmqFtfIYLfV68qsRoH+B7Q2ZhFbiwWqDwO37OAcUqk/RAHWIcG75YQIVk7uvfISm3P0f/V0i6mgF+Dr5/P4eaq6skBL8HQ="
-            }
+            })
             
             async with asyncio.timeout(30):
                 async with session.post(ENDPOINT_INVERTER_DETAIL, json=payload, headers=headers) as response:
@@ -265,16 +286,13 @@ class CloudInverterAPI:
                                 _LOGGER.info("Successfully retrieved inverter data with %d fields", len(data))
                                 return data
                             else:
-                                _LOGGER.warning("Received minimal inverter data: %s", data)
+                                _LOGGER.warning("Received minimal inverter data (%d fields)", len(data) if data else 0)
                                 return data  # Return it anyway, might have some data
                         except Exception as e:
                             _LOGGER.error("Failed to parse inverter data JSON: %s", e)
-                            _LOGGER.debug("Response text: %s", response_text[:500])
                             return {}
                     else:
-                        response_text = await response.text()
-                        _LOGGER.error("Failed to get inverter data (status %s): %s", 
-                                    response.status, response_text[:500])
+                        _LOGGER.error("Failed to get inverter data (HTTP %s)", response.status)
                         return {}
                     
         except Exception as err:

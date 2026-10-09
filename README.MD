@@ -39,7 +39,7 @@ A Home Assistant integration for monitoring Cloud Inverter (SenergyTec) solar sy
 1. Open HACS in Home Assistant
 2. Click the three dots (⋯) → Custom Repositories
 3. Add repository:
-   - URL**: `https://github.com/yourusername/ha-cloud-inverter`
+   - URL**: `https://github.com/usamakkhan/home-assistant-Cloud-Inverter`
    - Category**: Integration
 4. Click Add
 5. Search for **"Cloud Inverter"** and install
@@ -48,7 +48,7 @@ A Home Assistant integration for monitoring Cloud Inverter (SenergyTec) solar sy
  Method 2: Manual Installation
 
 1. Download the repository as ZIP
-2. Extract to `config/custom_components/cloud_inverter/`
+2. Copy `custom_components/cloud_inverter/` from the archive to `config/custom_components/cloud_inverter/`.
 3. Restart Home Assistant
 
  Setup
@@ -162,9 +162,9 @@ automation:
 This integration connects to your Cloud Inverter's cloud API:
 - Base URL**: `https://www.cloudinverter.net`
 - Update Frequency**: 60 seconds (configurable)
-- Authentication**: Username + Password (no tokens stored locally)
+- Authentication**: Username + Password. Requests are signed from their current fields.
 
-No API keys, tokens, or sensitive data are stored in your Home Assistant configuration!
+Home Assistant stores the username and password in the integration's config entry. The cloud API token is kept in memory for the active session. Protect Home Assistant backups and do not share config entries or unredacted logs.
 
  Troubleshooting
 
@@ -172,6 +172,7 @@ No API keys, tokens, or sensitive data are stored in your Home Assistant configu
 - Verify your username and password are correct
 - Check your internet connection
 - Ensure your Cloud Inverter device is online
+- If login fails while the website works, enable the logger below and check the `Cloud Inverter login rejected` status and code. Share only those values when reporting the issue; replace account IDs and serial numbers with `ABCDE123456789` and remove passwords, tokens, and cookies.
 
  Sensors showing "unavailable"
 - Check Home Assistant logs for errors
@@ -189,8 +190,8 @@ logger:
  Contributing
 
 Found an issue? Have a suggestion?
-- 🐛 [Report a bug](https://github.com/usamakkhan/ha-cloud-inverter/issues)
-- ✨ [Request a feature](https://github.com/usamakkhan/ha-cloud-inverter/issues)
+- 🐛 [Report a bug](https://github.com/usamakkhan/home-assistant-Cloud-Inverter/issues)
+- ✨ [Request a feature](https://github.com/usamakkhan/home-assistant-Cloud-Inverter/issues)
 
  License
 

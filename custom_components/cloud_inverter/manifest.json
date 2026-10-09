@@ -1,11 +1,11 @@
 {
   "domain": "cloud_inverter",
   "name": "Cloud Inverter",
-  "version": "1.0.4",
-  "documentation": "https://github.com/usama-khursheed/home-assistant-Cloud-Inverter",
-  "issue_tracker": "https://github.com/usama-khursheed/home-assistant-Cloud-Inverter/issues",
-  "requirements": ["aiohttp>=3.8.0"],
-  "codeowners": ["@usama-khursheed"],
+  "version": "1.0.5",
+  "documentation": "https://github.com/usamakkhan/home-assistant-Cloud-Inverter",
+  "issue_tracker": "https://github.com/usamakkhan/home-assistant-Cloud-Inverter/issues",
+  "requirements": ["aiohttp>=3.8.0", "cryptography>=41.0.0"],
+  "codeowners": ["@usamakkhan"],
   "iot_class": "cloud_polling",
   "config_flow": true
 }

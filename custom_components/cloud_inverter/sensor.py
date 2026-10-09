@@ -54,7 +54,7 @@ async def async_setup_entry(
     # Set the goods_id directly if provided
     if goods_id:
         api.goods_id = goods_id
-        _LOGGER.info("Using pre-configured inverter GoodsID: %s", goods_id)
+        _LOGGER.info("Using selected inverter")
     
     # Create coordinator
     coordinator = CloudInverterDataUpdateCoordinator(hass, api)
@@ -178,8 +178,6 @@ class CloudInverterDataUpdateCoordinator(DataUpdateCoordinator):
         try:
             data = await self.api.get_inverter_data()
             
-            _LOGGER.debug("Raw API data: %s", data)
-            
             if not data:
                 _LOGGER.warning("No data returned from API")
                 # Return empty dict but don't fail - sensors will show unavailable
@@ -231,7 +229,7 @@ class CloudInverterDataUpdateCoordinator(DataUpdateCoordinator):
                 except (ValueError, TypeError):
                     flattened_data["battery_power"] = 0
             
-            _LOGGER.debug("Flattened data: %s", flattened_data)
+            _LOGGER.debug("Inverter update contains %d fields", len(flattened_data))
             return flattened_data
             
         except Exception as err:

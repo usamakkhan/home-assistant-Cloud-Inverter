@@ -1,0 +1,6 @@
+__pycache__/
+*.py[cod]
+*.sqlite3
+*.log
+.env
+cloud_portal_capture_*/
