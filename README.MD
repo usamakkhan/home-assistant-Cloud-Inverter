@@ -189,8 +189,8 @@ logger:
  Contributing
 
 Found an issue? Have a suggestion?
-- 🐛 [Report a bug](https://github.com/yourusername/ha-cloud-inverter/issues)
-- ✨ [Request a feature](https://github.com/yourusername/ha-cloud-inverter/issues)
+- 🐛 [Report a bug](https://github.com/usamakkhan/ha-cloud-inverter/issues)
+- ✨ [Request a feature](https://github.com/usamakkhan/ha-cloud-inverter/issues)
 
  License
 
@@ -199,7 +199,7 @@ MIT License - See LICENSE file
  Support
 
 For issues specific to:
-- Integration**: [GitHub Issues](https://github.com/usama-khursheed/home-assistant-Cloud-Inverter/issues)
+- Integration: [GitHub Issues](https://github.com/usamakkhan/home-assistant-Cloud-Inverter/issues)
 - Cloud Inverter Device**: Contact your device manufacturer
 
 ---
