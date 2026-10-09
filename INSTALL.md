@@ -228,6 +228,6 @@ directory when replacing application files.
 | Local sensors are unavailable or old | Check `/api/ha`, the analyzer dashboard's capture time, and whether its process is still running. |
 | Cloud uploads stop or datalogger turns red | Return to Original/cloud-only mode; use Cooperative collection at a 180-second target when trying again. |
 
-See the [main README](README.MD), [analyzer guide](local_analyzer/README.md),
+See the [main README](README.md), [analyzer guide](local_analyzer/README.md),
 and [local Home Assistant guide](local_analyzer/home_assistant/README.md) for
 feature descriptions and further troubleshooting.
