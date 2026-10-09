@@ -29,6 +29,7 @@ from homeassistant.helpers.update_coordinator import (
 )
 
 from .api import CloudInverterAPI
+from .numeric import numeric_state
 from .const import (
     DOMAIN,
     UPDATE_INTERVAL,
@@ -281,11 +282,13 @@ class CloudInverterSensor(CoordinatorEntity, SensorEntity):
         if value is None or value == "" or value == "-":
             return None
         
-        # Try to convert to float for numeric values
-        try:
-            return float(value)
-        except (ValueError, TypeError):
-            return value
+        number = numeric_state(value)
+        if self._attr_state_class is not None:
+            # Statistics and the Energy selector require a numeric state. Portal
+            # placeholders must not be published as text by a numeric sensor.
+            return number
+
+        return number if number is not None else value
 
     @property
     def device_info(self):

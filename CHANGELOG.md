@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.4.2 — 2026-10-09
+
+- Keep cloud energy and other numeric sensors numeric when the portal returns
+  a formatted number, and leave missing or invalid readings without a numeric
+  state instead of sending text into Home Assistant statistics.
+- Mark direct LAN daily energy counters as `total_increasing`, so Home
+  Assistant treats the daily reset as a new meter cycle.
+- Document which lifetime counters belong in the Energy dashboard and how to
+  troubleshoot a missing sensor in its selectors. Existing entity IDs remain
+  the same.
+
 ## 1.4.1 — 2026-10-09
 
 - Use a verified absolute public URL for the README icon so it renders in
