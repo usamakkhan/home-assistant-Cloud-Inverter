@@ -62,6 +62,12 @@ The inverter reportedly uploads to the portal about every five minutes. Two API 
 
 If the integration rejects credentials that work on the website, verify account details and portal availability, then collect a **sanitized** Home Assistant error for an issue. Website and API behavior can differ. Never share passwords, session tokens, account IDs, or real serials.
 
+### Configure the Energy dashboard
+
+In **Settings → Dashboards → Energy**, assign **Total Energy** to solar production, **Grid Import Total** to grid energy imported, and **Grid Export Total** to grid energy exported. For a supported home battery, use **Battery Charge Total** for energy going into the battery and **Battery Discharge Total** for energy coming out. These are cumulative kWh counters; Home Assistant measures their increases. A lifetime reading is the starting point for future increases, not energy consumed or produced on the day you add it. Select each production stream once; do not add both **Daily Energy** and **Total Energy** for the same inverter.
+
+If a sensor is absent from the Energy selector, find it in **Settings → Developer Tools → States** and check for a numeric state, `device_class: energy`, `state_class: total_increasing`, and `unit_of_measurement: kWh`. Then inspect **Settings → Developer Tools → Statistics** for an error on that entity and confirm Recorder has not excluded it. See the [Home Assistant Energy FAQ](https://www.home-assistant.io/docs/energy/faq/) and the [README Energy guide](README.md#-add-cloudinverternet-sensors-to-the-energy-dashboard).
+
 ## Upgrade from an older analyzer based setup
 
 Version **1.4.0** removes the former standalone analyzer application, its HTTP source, and its companion Home Assistant connector from this repository. If you previously created a **Local analyzer** entry in Cloud Inverter:

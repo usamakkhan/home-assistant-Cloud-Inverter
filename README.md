@@ -58,6 +58,22 @@ Depending on the source and inverter, readings can cover:
 
 Cloud and direct LAN paths have different field sets. A missing register or portal field is not treated as zero. Home Assistant assigns entity IDs when it creates entities, so check your device page for the actual names. The app does **not** invent readings before a successful capture.
 
+### ⚡ Add CloudInverter.net sensors to the Energy dashboard
+
+Open **Settings → Dashboards → Energy** and use the following cumulative **kWh** sensors for the matching fields. Use the actual entity IDs shown on your Cloud Inverter device page.
+
+| Energy dashboard field | Cloud Inverter sensor |
+| --- | --- |
+| Solar panels → solar production | **Total Energy** |
+| Electricity grid → energy imported from grid | **Grid Import Total** |
+| Electricity grid → energy exported to grid | **Grid Export Total** |
+| Home battery → energy going into the battery | **Battery Charge Total** |
+| Home battery → energy coming out of the battery | **Battery Discharge Total** |
+
+**Total Energy is the inverter's lifetime production counter.** Home Assistant uses changes in a cumulative sensor, not a sum of every displayed reading. If a counter starts at 0 and later reads 1, 4, and 5 kWh, the day's gain is **5 kWh**, not 10 kWh. If Home Assistant first observes it at 1 kWh, that first reading is its baseline and it records the later **4 kWh** gain. A lifetime counter works the same way: an example initial 10,000 kWh is a starting point, not 10,000 kWh of new production. Do not add both **Daily Energy** and **Total Energy** as solar production sources for the same inverter; that would count one production stream twice. Power readings in W or kW describe the current rate, while these energy readings are in kWh.
+
+If one of these sensors is missing from a selector, open **Settings → Developer Tools → States** and find its actual entity ID. Check that it has a numeric state, `device_class: energy`, `state_class: total_increasing`, and `unit_of_measurement: kWh`. These are set by the integration for the cloud total sensors. Then check **Settings → Developer Tools → Statistics** for errors affecting that entity, and confirm the Recorder integration is recording it. Home Assistant's [Energy FAQ](https://www.home-assistant.io/docs/energy/faq/) explains the selector requirements, and its [long-term statistics guide](https://www.home-assistant.io/docs/configuration/long-term-statistics/) explains how cumulative changes are counted. If it still does not appear, report the exact Energy field, entity ID, and sanitized attributes; hide serial numbers and account details.
+
 ## 🚀 Install in Home Assistant
 
 ### Option A: HACS
