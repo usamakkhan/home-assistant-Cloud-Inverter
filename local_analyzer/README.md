@@ -1,5 +1,8 @@
 # SolarMax PV9000 local analyzer
 
+For the complete Home Assistant installation sequence, start with the
+[installation guide](../INSTALL.md).
+
 Version `0.12.0` of this standalone Python application reads a supported
 SolarMax/Senergy PV9000 inverter through its LAN Modbus/TCP bridge, stores
 captures locally, and serves a dashboard plus a cached Home Assistant feed.

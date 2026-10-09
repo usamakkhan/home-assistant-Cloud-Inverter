@@ -2,6 +2,9 @@
 
 A Home Assistant sensor integration with two data sources:
 
+**New installation?** Follow the [detailed installation guide](INSTALL.md)
+for HACS or manual setup, cloud login, and the complete local analyzer path.
+
 | Source | Where readings come from | Credentials | Default Home Assistant refresh |
 | --- | --- | --- | --- |
 | CloudInverter.net | The vendor's HTTPS API | CloudInverter username and password | 30 seconds |

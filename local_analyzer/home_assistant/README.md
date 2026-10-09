@@ -1,5 +1,9 @@
 # Use the SolarMax local analyzer with Home Assistant
 
+The [installation guide](../../INSTALL.md) covers downloading the repository,
+installing the main integration, starting the analyzer, and connecting it to
+Home Assistant step by step.
+
 The analyzer runs on a computer that can reach the inverter's LAN Modbus/TCP
 bridge. Home Assistant reads the analyzer's cached `/api/ha` response over
 HTTP. The dashboard and Home Assistant share one primary collector; adding a
