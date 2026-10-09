@@ -19,6 +19,9 @@ The integration creates sensor entities for available measurements. It does not 
 > **License from v1.5.0:** [PolyForm Strict License 1.0.0](https://github.com/usamakkhan/home-assistant-Cloud-Inverter/blob/main/LICENSE). It permits noncommercial use but does not grant permission to redistribute the integration, sell copies, or publish modified versions. Copyright © 2026 Usama Khan. Earlier versions released under MIT retain their original license terms.
 
 > [!IMPORTANT]
+> GitHub currently reports PolyForm Strict as an unidentified license (`NOASSERTION`), so this repository's **HACS validation action fails its license check**. The code tests pass. If HACS does not offer this version, use the [manual installation steps](https://github.com/usamakkhan/home-assistant-Cloud-Inverter/blob/main/INSTALL.md#manual). The project will not label this release as MIT to make validation pass because that would grant rights the maintainer has not offered.
+
+> [!IMPORTANT]
 > On the installation reported by the project owner, the **inverter uploads data to CloudInverter.net about every five minutes**. A Home Assistant cloud refresh can happen more often, but it may receive the **same uploaded reading** until the inverter sends its next update. The integration does not control the inverter's upload schedule.
 
 ## 🧭 Choose your data source

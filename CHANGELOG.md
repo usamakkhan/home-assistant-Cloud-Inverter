@@ -7,6 +7,8 @@
   versions without separate permission from the copyright holder.
 - Update README license information and badge. Earlier releases under MIT
   retain their original terms; this change does not alter those grants.
+- HACS validation currently fails its license-identification check because
+  GitHub reports PolyForm Strict as `NOASSERTION`; the integration tests pass.
 - No integration behavior or existing Home Assistant entity IDs change.
 
 ## 1.4.3 — 2026-10-09
