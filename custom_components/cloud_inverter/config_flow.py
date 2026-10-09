@@ -33,6 +33,7 @@ from .const import (
     DEFAULT_DIRECT_PORT,
     DEFAULT_DIRECT_UNIT_ID,
     DEFAULT_LOCAL_SCAN_INTERVAL,
+    MIN_CLOUD_SCAN_INTERVAL,
     UPDATE_INTERVAL,
 )
 
@@ -409,7 +410,7 @@ class CloudInverterOptionsFlow(config_entries.OptionsFlowWithReload):
                 )
             ))] = vol.All(vol.Coerce(int), vol.Range(min=0, max=255))
         fields[vol.Required(CONF_SCAN_INTERVAL, default=(user_input or {}).get(CONF_SCAN_INTERVAL, current))] = vol.All(
-            vol.Coerce(int), vol.Range(min=10 if (local or direct) else UPDATE_INTERVAL, max=900)
+            vol.Coerce(int), vol.Range(min=10 if (local or direct) else MIN_CLOUD_SCAN_INTERVAL, max=900)
         )
         return self.async_show_form(
             step_id="init",

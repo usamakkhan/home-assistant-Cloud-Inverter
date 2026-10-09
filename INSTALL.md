@@ -9,7 +9,7 @@ it is not a new Cloud Inverter setup choice.
 
 | Source | You need | Default Home Assistant refresh |
 | --- | --- | --- |
-| CloudInverter.net | A working portal account, an inverter associated with it, and internet access from Home Assistant | 30 seconds |
+| CloudInverter.net | A working portal account, an inverter associated with it, and internet access from Home Assistant | 300 seconds (5 minutes) |
 | Get Data Locally using Inverter IP | Home Assistant can reach the SolarMax PV9000 Modbus/TCP bridge on your LAN; no separate analyzer process | 180 seconds |
 
 Download the repository with **Code → Download ZIP** on
@@ -73,10 +73,12 @@ restart again. Do not copy the entire repository into `custom_components`.
    associated with the account, select the intended inverter.
 4. Open the new device and wait for its first sensor update.
 
-The default cloud refresh is **30 seconds**. To change it later, open the
+The default cloud refresh is **300 seconds (5 minutes)**. To change it later, open the
 integration's **Options** and choose a value from **30–900 seconds**. This
-refresh asks the vendor API for data; the vendor may update its underlying
-reading on a different schedule.
+refresh asks the vendor API for data; on the reported installation, the inverter
+uploads to the vendor about every five minutes. More frequent API requests can
+return the same reading. A previously saved custom interval in Options remains
+in effect until you change it.
 
 If setup reports incorrect credentials while website login works, confirm the
 account and portal service, then collect only a **sanitized** Home Assistant

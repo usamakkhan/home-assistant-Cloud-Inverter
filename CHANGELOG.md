@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.3.5 — 2026-10-09
+
+- Change the default CloudInverter.net API refresh from 30 to 300 seconds to
+  match the approximately five-minute inverter upload cadence reported for
+  this installation. Keep the editable cloud range at 30–900 seconds.
+- Preserve any refresh interval already saved in an entry's Options.
+- Clarify the distinction between inverter uploads and Home Assistant API
+  requests in the README and installation guide.
+
 ## 1.3.4 — 2026-10-09
 
 - Rename the direct setup choice to **Get Data Locally using Inverter IP**.

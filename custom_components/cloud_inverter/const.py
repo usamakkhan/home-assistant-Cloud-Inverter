@@ -34,8 +34,10 @@ DEFAULT_DIRECT_PORT = 502
 DEFAULT_DIRECT_UNIT_ID = 1
 DEFAULT_LOCAL_SCAN_INTERVAL = 180
 
-# Update interval (in seconds)
-UPDATE_INTERVAL = 30
+# Cloud API polling (seconds). The inverter uploads to the vendor roughly every
+# five minutes on the reported installation; faster polling usually repeats data.
+UPDATE_INTERVAL = 300
+MIN_CLOUD_SCAN_INTERVAL = 30
 
 # Sensor Types - Photovoltaic (Solar)
 SENSOR_PV_POWER = "pv_power"

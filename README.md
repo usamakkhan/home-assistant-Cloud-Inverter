@@ -24,7 +24,7 @@ The integration creates sensor entities for available measurements. It does not 
 | --- | --- | --- |
 | Setup label | **Get Data Locally using Inverter IP** | **CloudInverter.net** |
 | Home Assistant connects to | Inverter LAN IP and Modbus/TCP port | Vendor HTTPS API |
-| Default interval | **180 seconds** between collection attempts | **30 seconds** between API requests |
+| Default interval | **180 seconds** between collection attempts | **300 seconds (5 minutes)** between API requests |
 | Adjustable interval | **10–900 seconds** in Options | **30–900 seconds** in Options |
 | Default port / unit | **502 / 1**, both editable | Not applicable |
 | Portal credentials | Not required | Required |
@@ -34,7 +34,7 @@ The integration creates sensor entities for available measurements. It does not 
 ```mermaid
 flowchart LR
     I["☀️ Inverter"] -->|"reported cloud upload: about 5 min"| C["☁️ CloudInverter.net"]
-    H["🏠 Home Assistant"] -->|"cloud API check: 30 s default"| C
+    H["🏠 Home Assistant"] -->|"cloud API check: 300 s default"| C
     H -->|"direct Modbus read: 180 s default"| I
     classDef device fill:#FFF3C4,stroke:#C68810,color:#242424
     classDef ha fill:#D8F3E5,stroke:#1E8250,color:#242424
@@ -44,7 +44,7 @@ flowchart LR
     class C cloud
 ```
 
-The diagram shows the two available paths; select one when adding the integration. The reported five-minute upload is **device-to-cloud traffic**, while the 30-second and 180-second values are **Home Assistant read intervals**. A direct LAN capture can be delayed by a quiet window around the estimated cloud upload period, so its actual spacing may exceed 180 seconds.
+The diagram shows the two available paths; select one when adding the integration. The reported five-minute upload is **device-to-cloud traffic**, while the 300-second and 180-second values are **Home Assistant read intervals**. Matching the cloud interval to the reported upload cadence avoids most repeated API requests, but the two clocks are not synchronized. A direct LAN capture can be delayed by a quiet window around the estimated cloud upload period, so its actual spacing may exceed 180 seconds.
 
 ## 📊 What data appears in Home Assistant?
 
@@ -96,7 +96,7 @@ The initial probe confirms that a Modbus response came from the entered endpoint
 3. Wait for the first API update, then inspect the device and sensor states.
 4. If desired, change the API refresh interval in **Options** (30–900 seconds).
 
-At the default 30-second interval, Home Assistant can ask the API several times during one reported five-minute inverter upload cycle. Repeated values during that period can be normal. Changing the Home Assistant refresh interval does **not** change how often the inverter transmits to the vendor.
+The default is **300 seconds (5 minutes)** because the inverter uploads about that often on the reported installation. Even at this interval, consecutive requests can return the same snapshot if the upload and polling clocks do not line up or a cloud update is delayed. You can select 30–900 seconds in Options. Changing the Home Assistant refresh interval does **not** change how often the inverter transmits to the vendor. Existing entries with a custom interval saved in Options keep that choice.
 
 Credentials are stored in the Home Assistant config entry; the API session token is kept in memory. Protect Home Assistant backups. If website login works but integration login fails, check the portal/API status and share only sanitized logs in an issue.
 
