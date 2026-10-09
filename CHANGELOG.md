@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.4.1 — 2026-10-09
+
+- Use a verified absolute public URL for the README icon so it renders in
+  HACS's repository details view as well as on GitHub.
+- Make other README links absolute so they also work inside HACS.
+
 ## 1.4.0 — 2026-10-09
 
 - Remove the former standalone analyzer application, its companion Home

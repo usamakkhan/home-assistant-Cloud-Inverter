@@ -1,10 +1,10 @@
 # ☀️ Cloud Inverter for Home Assistant
 
-<p align="center"><img src="custom_components/cloud_inverter/brand/icon.png" alt="Cloud Inverter icon" width="112"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/usamakkhan/home-assistant-Cloud-Inverter/main/custom_components/cloud_inverter/brand/icon.png" alt="Cloud Inverter icon" width="112"></p>
 
 <p align="center">
   <a href="https://github.com/usamakkhan/home-assistant-Cloud-Inverter/releases"><img alt="Release" src="https://img.shields.io/github/v/release/usamakkhan/home-assistant-Cloud-Inverter?color=blue"></a>
-  <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-green"></a>
+  <a href="https://github.com/usamakkhan/home-assistant-Cloud-Inverter/blob/main/LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-green"></a>
   <a href="https://github.com/usamakkhan/home-assistant-Cloud-Inverter/actions"><img alt="Validation" src="https://img.shields.io/github/actions/workflow/status/usamakkhan/home-assistant-Cloud-Inverter/hacs-validation.yml?branch=main&label=validation"></a>
 </p>
 
@@ -73,7 +73,7 @@ Cloud and direct LAN paths have different field sets. A missing register or port
 2. Copy the entire `custom_components/cloud_inverter` directory into Home Assistant's `/config/custom_components/` directory. The result should contain `/config/custom_components/cloud_inverter/manifest.json`.
 3. Restart Home Assistant, then add **Cloud Inverter** from **Settings → Devices & services**.
 
-See the [detailed installation guide](INSTALL.md) for step-by-step setup, network checks, and updating. HACS and manual installation provide the same two setup choices.
+See the [detailed installation guide](https://github.com/usamakkhan/home-assistant-Cloud-Inverter/blob/main/INSTALL.md) for step-by-step setup, network checks, and updating. HACS and manual installation provide the same two setup choices.
 
 ## 🏠 Set up direct inverter LAN access
 
@@ -131,5 +131,5 @@ Remove or redact passwords, tokens, account IDs, serials, MAC addresses, and pri
 ## 🧪 Development, support, and license
 
 - Run the integration tests with `python -m unittest discover -s tests -v`. They cover signing, URL validation, direct Modbus checks, capture behavior, and freshness logic; they do not replace a real inverter and Home Assistant test.
-- Review release changes in the [changelog](CHANGELOG.md) and report reproducible problems through [GitHub Issues](https://github.com/usamakkhan/home-assistant-Cloud-Inverter/issues), using sanitized details.
-- This repository uses the [MIT License](LICENSE). Bundled integration icons live in [`brand/`](custom_components/cloud_inverter/brand); [Home Assistant's brand image guidance](https://developers.home-assistant.io/docs/core/integration/brand_images/) explains how Home Assistant displays integration assets.
+- Review release changes in the [changelog](https://github.com/usamakkhan/home-assistant-Cloud-Inverter/blob/main/CHANGELOG.md) and report reproducible problems through [GitHub Issues](https://github.com/usamakkhan/home-assistant-Cloud-Inverter/issues), using sanitized details.
+- This repository uses the [MIT License](https://github.com/usamakkhan/home-assistant-Cloud-Inverter/blob/main/LICENSE). Bundled integration icons live in [`brand/`](https://github.com/usamakkhan/home-assistant-Cloud-Inverter/tree/main/custom_components/cloud_inverter/brand); [Home Assistant's brand image guidance](https://developers.home-assistant.io/docs/core/integration/brand_images/) explains how Home Assistant displays integration assets.
