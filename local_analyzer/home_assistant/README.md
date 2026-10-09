@@ -15,24 +15,23 @@ PV9000 Wi-Fi bridge --Modbus/TCP--> local_analyzer/app.py
                                       +-- cached /api/ha --> Home Assistant
 ```
 
-There are four alternatives for Home Assistant:
+There are three current ways to use local readings with Home Assistant:
 
 1. **Cloud Inverter integration → Direct inverter LAN**: Home Assistant reads
    the PV9000 bridge itself. No separate analyzer process is needed; see the
    [direct installation steps](../../INSTALL.md#2b-connect-directly-from-home-assistant).
-2. **Cloud Inverter integration → Local analyzer**: it is part of
-   this repository's main Home Assistant integration and asks for Host, Port,
-   and Home Assistant cache scan interval. It needs no cloud credentials.
-3. **Standalone SolarMax Local Cloud Connector**: the
+2. **Standalone SolarMax Local Cloud Connector**: the
    `custom_components/solarmax_pv9000` directory in this folder. It asks for
    the analyzer's full base URL and a cache scan interval.
-4. **REST package**: `solarmax_rest_package.yaml` creates a smaller set of
+3. **REST package**: `solarmax_rest_package.yaml` creates a smaller set of
    sensors without a custom integration.
 
 Choose **one** option per inverter so the same readings do not appear twice
 or create two local Modbus readers.
 The cloud-login source of the main Cloud Inverter integration is a separate
 choice and does not use this analyzer.
+Existing Cloud Inverter **Local analyzer** entries remain supported, but that
+choice is no longer offered when adding a new Cloud Inverter entry.
 
 ## 1. Start the analyzer
 
@@ -54,8 +53,9 @@ To use another analyzer HTTP port, change `--port`, for example:
 python app.py --no-browser --bind 0.0.0.0 --port 9000 --no-peer-api --monitor-host INVERTER_LAN_IP --monitor-interval 180 --monitor-mode cooperative
 ```
 
-Then enter **Port 9000** in the main Home Assistant integration or
-`http://ANALYZER_LAN_IP:9000` in the standalone connector. The inverter's
+Then enter `http://ANALYZER_LAN_IP:9000` in the standalone connector.
+Existing main-integration analyzer entries can change Port to 9000 in
+**Options**. The inverter's
 Modbus/TCP port is a separate service, normally `502`; do not enter `502` as
 the analyzer HTTP port.
 
@@ -89,34 +89,15 @@ minutes.
 `0.0.0.0` is a bind address, **not** the Host or URL to enter in Home
 Assistant. Use the analyzer computer's reachable LAN IP or hostname.
 
-## 3. Recommended: Cloud Inverter's Local analyzer option
+## 3. Existing Cloud Inverter analyzer entries
 
-Install the repository's `custom_components/cloud_inverter` with HACS or
-copy it to `/config/custom_components/cloud_inverter`, then restart Home
-Assistant. Open **Settings → Devices & services → Add integration**, search
-for **Cloud Inverter**, and choose **Local analyzer**.
+Entries created with the earlier **Local analyzer** choice continue reading
+the analyzer's cached `/api/ha` endpoint. Their **Options** menu can still
+change analyzer Host, HTTP Port, and Home Assistant cache scan interval.
+The cache scan does not change the analyzer's inverter collection target.
+For a new analyzer connection, use the standalone connector below.
 
-| Field | Enter | Default |
-| --- | --- | --- |
-| Host | Analyzer computer IP or hostname only, without `http://` or a path | Sample `192.168.50.20`; replace it |
-| Port | Analyzer HTTP port from `--port` | `8765` |
-| Home Assistant cache scan | Seconds between HTTP reads of cached data | `180`; valid range 10–900 |
-
-No CloudInverter.net username or password is required. After setup, use the
-integration's **Options** menu to change Host, Port, or the Home Assistant
-cache scan interval. The setup and Options forms verify that Host and Port
-reach a SolarMax analyzer `/api/config` response. A new entry's first sensor
-update still needs a successful `/api/ha` capture.
-
-The **inverter collection target** is a different setting in the analyzer
-dashboard. It is preset to 180 seconds but starts disabled unless you enable
-collection. Changing the Home Assistant cache scan does not change Modbus
-polling. A 10-second cache scan only rereads the stored HTTP payload; a
-10-second **direct inverter** target can disrupt cloud uploads. On the
-reported installation it stopped CloudInverter uploads and turned the
-datalogger indicator red.
-
-## 4. Standalone connector alternative
+## 4. Standalone connector for new installations
 
 The standalone connector has its own domain and is separate from the main
 Cloud Inverter integration:
@@ -134,8 +115,6 @@ Backup, GEN, Normal Load, operating mode, and energy counters. Availability
 depends on the analyzer payload; a missing value is not made into a zero.
 Its setup expects the analyzer to report read-only mode, so start the
 analyzer without `--enable-inverter-controls` when using this alternative.
-The main Cloud Inverter integration's local option does not impose that
-read-only check.
 
 ## 5. REST package alternative
 

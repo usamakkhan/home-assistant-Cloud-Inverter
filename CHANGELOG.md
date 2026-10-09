@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.3.3 — 2026-10-09
+
+- Simplify new Cloud Inverter setup to two choices: **Direct inverter LAN**
+  and **CloudInverter.net**.
+- Keep existing Local analyzer config entries and their Options working.
+  New installations that need the separate analyzer dashboard can use its
+  standalone Home Assistant connector or REST package.
+- Update setup and installation documentation to match the two-choice flow.
+
 ## 1.3.2 — 2026-10-09
 
 - Display the existing integration icon in the repository README.

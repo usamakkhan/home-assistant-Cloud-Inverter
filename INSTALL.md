@@ -1,10 +1,9 @@
 # Installation guide
 
-This guide installs **Cloud Inverter** in Home Assistant and connects either
-CloudInverter.net or a local SolarMax PV9000 analyzer. Choose one source when
-adding the integration. The local analyzer is a separate Python application
-that runs on a computer with access to the inverter; it does not run inside
-Home Assistant.
+This guide installs **Cloud Inverter** in Home Assistant with either
+CloudInverter.net or direct SolarMax PV9000 LAN collection. The separate local
+analyzer remains an optional application for its dashboard and history;
+it is not a new Cloud Inverter setup choice.
 
 ## Before you start
 
@@ -12,7 +11,6 @@ Home Assistant.
 | --- | --- | --- |
 | CloudInverter.net | A working portal account, an inverter associated with it, and internet access from Home Assistant | 30 seconds |
 | Direct inverter LAN | Home Assistant can reach the SolarMax PV9000 Modbus/TCP bridge on your LAN; no separate analyzer process | 180 seconds |
-| Local analyzer | Python 3.11+ on an always-on LAN computer, access to the inverter's Modbus/TCP bridge, and network access from Home Assistant to the analyzer | 180 seconds |
 
 Download the repository with **Code → Download ZIP** on
 [GitHub](https://github.com/usamakkhan/home-assistant-Cloud-Inverter), or clone
@@ -119,7 +117,7 @@ models or firmware may expose fewer values. Do not add the separate local
 analyzer source for the same inverter unless you intentionally want another
 Modbus reader.
 
-## 2C. Run the separate local analyzer
+## Optional: run the separate local analyzer
 
 ### Check the host and network
 
@@ -183,45 +181,27 @@ returns HTTP **503**; wait for the analyzer's capture status to show a reading
 before adding the Home Assistant source. If there are no captures, check the
 inverter IP, bridge access, collector mode, and firewall.
 
-### Add the local source to Home Assistant
+### Connect the optional analyzer to Home Assistant
 
-1. Open **Settings → Devices & services → Add integration → Cloud Inverter**.
-2. Choose **Local analyzer**.
-3. Enter the analyzer computer's LAN IP or hostname in **Host**, such as
-   `192.168.50.20`. Do not include `http://`, a port, or `/api/ha`.
-4. Leave **Port** at **8765**, or enter the port chosen with `--port`.
-5. Leave **Home Assistant cache scan** at **180 seconds**, or set a value
-   from **10–900 seconds**.
-6. Finish setup and open the created device to check sensor states.
+For a new installation, use the standalone connector bundled with the
+analyzer:
 
-The Home Assistant cache scan controls HTTP reads of the analyzer's stored
-sample. The analyzer's **collection target** separately controls inverter
-reads. Changing the cache scan does not change collection frequency. To edit
-Host, Port, or cache scan later, open the integration's **Options**. To edit
-collection, use the analyzer dashboard or restart it with a new
-`--monitor-interval`.
+1. Copy `local_analyzer/home_assistant/custom_components/solarmax_pv9000`
+   to `/config/custom_components/solarmax_pv9000`.
+2. Restart Home Assistant and add **SolarMax Local Cloud Connector**.
+3. Enter the analyzer's full base URL, such as
+   `http://192.168.50.20:8765`, and keep its 180-second cache scan default.
+   Replace the sample IP and port with your analyzer's actual address.
+4. Check the new device's sensor states after the first successful capture.
 
-Do not install the standalone `solarmax_pv9000` connector alongside this local
-source for the same analyzer: that creates duplicate entities.
-
-## Optional local Home Assistant methods
-
-The simplest local method is **Cloud Inverter → Direct inverter LAN** above.
-The separate analyzer is useful when you also want its dashboard and history.
-Two alternatives are included for installations that need them:
-
-- **Standalone connector:** Copy
-  `local_analyzer/home_assistant/custom_components/solarmax_pv9000` to
-  `/config/custom_components/solarmax_pv9000`, restart Home Assistant, and add
-  **SolarMax Local Cloud Connector**. Enter the analyzer's full base URL
-  (`http://192.168.50.20:8765`) and its cache scan interval. This connector
-  requires analyzer controls to be disabled. Use it instead of the Cloud
-  Inverter local source.
-- **REST package:** Follow the
-  [local Home Assistant guide](local_analyzer/home_assistant/README.md) to
-  enable packages in `configuration.yaml`, set the analyzer URL in
-  `solarmax_rest_package.yaml`, and restart Home Assistant. It exposes a
-  smaller sensor set and should also be used instead of another local method.
+The connector requires analyzer controls to be disabled. The analyzer's
+**collection target** separately controls inverter reads; changing the Home
+Assistant cache scan only changes how often it rereads the stored HTTP data.
+Alternatively, use the [REST package instructions](local_analyzer/home_assistant/README.md)
+for a smaller sensor set. Existing Cloud Inverter **Local analyzer** entries
+continue to work and can change Host, Port, and cache scan through **Options**.
+Do not add a second connector for the same inverter unless you intend to
+duplicate the readings.
 
 ## Updating and checks
 

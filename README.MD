@@ -2,24 +2,21 @@
 
 <img src="custom_components/cloud_inverter/brand/icon.png" alt="Cloud Inverter solar panel icon" width="112">
 
-A Home Assistant sensor integration with three data sources:
+A Home Assistant sensor integration with two setup choices:
 
 **New installation?** Follow the [detailed installation guide](INSTALL.md)
-for HACS or manual setup, cloud login, and the complete local analyzer path.
+for HACS or manual setup, cloud login, and direct LAN collection.
 See the [changelog](CHANGELOG.md) for release changes.
 The repository is available under the [MIT License](LICENSE).
 
 | Source | Where readings come from | Credentials | Default Home Assistant refresh |
 | --- | --- | --- | --- |
 | CloudInverter.net | The vendor's HTTPS API | CloudInverter username and password | 30 seconds |
-| Local analyzer | The analyzer's cached `/api/ha` endpoint on your LAN | No cloud login | 180 seconds |
 | Direct inverter LAN | Home Assistant reads the SolarMax PV9000 Modbus/TCP bridge itself | No cloud login or separate analyzer | 180 seconds |
 
-Choose a source when adding the integration. The local source requires the
-[SolarMax PV9000 analyzer](local_analyzer/README.md) to run separately on a
-computer that can reach the inverter. Home Assistant reads its cached HTTP
-response; it does not open another Modbus connection. Existing cloud entries
-continue to use the cloud source.
+Choose a source when adding the integration. Existing **Local analyzer**
+config entries continue to work, but new setup offers the direct LAN choice
+instead of requiring a separate analyzer process.
 
 **Direct inverter LAN** runs the read-only PV9000 capture inside Home
 Assistant. Enter the inverter's LAN IP, Modbus/TCP port (default 502), and
@@ -88,34 +85,19 @@ the API may update the underlying inverter reading on a different schedule.
 Only the SolarMax/Senergy portal response shapes represented in the code have
 been implemented. Other device models are not guaranteed to expose all fields.
 
-## Add a local source
+## Add the direct LAN source
 
-For collection entirely inside Home Assistant, choose **Direct inverter LAN**
-instead and follow the [direct setup steps](INSTALL.md#2b-connect-directly-from-home-assistant).
+Choose **Direct inverter LAN** in the setup form and follow the
+[direct setup steps](INSTALL.md#2b-connect-directly-from-home-assistant).
+It reads the inverter within Home Assistant, with a 180-second collection
+interval and an editable Modbus/TCP port and unit ID.
 
-1. Start the [local analyzer](local_analyzer/README.md#quick-start) on your LAN.
-   It starts with inverter collection **off** unless you explicitly enable a
-   collector mode. The recommended collection target is 180 seconds in
-   Cooperative mode.
-2. Confirm that `http://ANALYZER_LAN_IP:8765/api/config` responds from the Home
-   Assistant network. Replace `ANALYZER_LAN_IP` with the analyzer computer's
-   address.
-3. Add **Cloud Inverter** in Home Assistant and choose **Local analyzer**.
-4. Enter the analyzer **Host** and **Port** in separate fields. Port defaults to
-   `8765`; change it if you started the analyzer with another `--port` value.
-   Enter only a hostname or IP in Host, without `http://` or `/api/ha`.
-5. Keep the default **Home Assistant cache scan** at 180 seconds or choose
-   10–900 seconds. This interval controls Home Assistant's HTTP cache reads,
-   not how often the analyzer contacts the inverter.
-
-The analyzer dashboard has the separate inverter **collection target** field,
-also preset to 180 seconds. Cooperative cloud quiet windows can delay a sample
-beyond that target. After setup, the integration's **Options** menu can change
-Host, Port, or Home Assistant refresh interval; the analyzer dashboard changes
-the inverter collection interval. The standalone
-`solarmax_pv9000` connector under `local_analyzer/home_assistant` is an
-alternative. Install only one connector for an analyzer to avoid duplicate
-entities.
+The [separate analyzer](local_analyzer/README.md) remains available as an
+optional dashboard and history application. To connect it to Home Assistant
+for a new installation, use its [standalone connector or REST package](local_analyzer/home_assistant/README.md).
+Existing Cloud Inverter **Local analyzer** entries retain their cached HTTP
+behavior and Options form. Use only one local collector per inverter to avoid
+duplicate readings.
 
 The source files use sample LAN addresses and `ABCDE123456789` in place of a
 real serial. Replace the sample host locally; no fake measurement is supplied

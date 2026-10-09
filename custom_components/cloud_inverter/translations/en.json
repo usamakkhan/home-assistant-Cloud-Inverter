@@ -23,15 +23,6 @@
         "title": "CloudInverter.net Login",
         "description": "Enter your CloudInverter.net login credentials."
       },
-      "local": {
-        "data": {
-          "scan_interval": "Home Assistant cache scan (seconds)",
-          "host": "Analyzer host or IP",
-          "port": "Analyzer port"
-        },
-        "title": "Local Analyzer",
-        "description": "Run the SolarMax local analyzer on your LAN first. Enter its host and port separately. The default port is 8765; Home Assistant reads cached data without polling the inverter directly."
-      },
       "direct": {
         "data": {
           "host": "Inverter LAN IP",
@@ -48,10 +39,6 @@
       "invalid_auth": "Invalid username or password. Please check your credentials and try again.",
       "no_inverters": "No inverters found in your account. Please add an inverter to your CloudInverter.net account first.",
       "unknown": "An unexpected error occurred. Please check the logs and try again.",
-      "invalid_url": "Enter the analyzer base URL with http:// or https:// and an explicit port, without /api/ha.",
-      "invalid_response": "The URL did not return a SolarMax analyzer configuration.",
-      "cannot_connect_local": "Cannot reach the local analyzer. Check its URL, LAN connection, and port 8765.",
-      "invalid_host": "Enter only the analyzer host or IP in Host and a port from 1 to 65535.",
       "invalid_direct_host": "Enter the inverter's LAN IP address and a valid port.",
       "cannot_connect_direct": "Home Assistant cannot reach the inverter's Modbus/TCP port. Check the IP, port, and LAN access."
     },

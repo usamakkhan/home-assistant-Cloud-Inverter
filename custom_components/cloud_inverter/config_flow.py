@@ -30,8 +30,6 @@ from .const import (
     CONF_PORT,
     CONF_UNIT_ID,
     CONF_SCAN_INTERVAL,
-    DEFAULT_LOCAL_HOST,
-    DEFAULT_LOCAL_PORT,
     DEFAULT_DIRECT_PORT,
     DEFAULT_DIRECT_UNIT_ID,
     DEFAULT_LOCAL_SCAN_INTERVAL,
@@ -91,10 +89,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Choose between the portal and a local analyzer."""
+        """Choose cloud access or direct LAN collection."""
         if user_input is not None:
-            if user_input[CONF_SOURCE] == SOURCE_LOCAL:
-                return await self.async_step_local()
             if user_input[CONF_SOURCE] == SOURCE_DIRECT:
                 return await self.async_step_direct()
             return await self.async_step_cloud()
@@ -104,60 +100,9 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             data_schema=vol.Schema({
                 vol.Required(CONF_SOURCE, default=SOURCE_DIRECT): vol.In({
                     SOURCE_DIRECT: "Direct inverter LAN (runs in Home Assistant)",
-                    SOURCE_LOCAL: "Local analyzer (no cloud login)",
                     SOURCE_CLOUD: "CloudInverter.net",
                 }),
             }),
-        )
-
-    async def async_step_local(
-        self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
-        """Connect to the local analyzer's cached HTTP API."""
-        errors: dict[str, str] = {}
-        if user_input is not None:
-            try:
-                host = str(user_input[CONF_HOST]).strip()
-                port = int(user_input[CONF_PORT])
-                base_url = build_analyzer_url(host, port)
-            except ValueError:
-                errors["base"] = "invalid_host"
-            else:
-                try:
-                    session = async_get_clientsession(self.hass)
-                    async with session.get(f"{base_url}/api/config", timeout=10) as response:
-                        response.raise_for_status()
-                        config = await response.json()
-                    if not is_analyzer_config(config):
-                        errors["base"] = "invalid_response"
-                    else:
-                        await self.async_set_unique_id(f"local:{base_url.lower()}")
-                        self._abort_if_unique_id_configured()
-                        return self.async_create_entry(
-                            title="Cloud Inverter Local",
-                            data={
-                                CONF_SOURCE: SOURCE_LOCAL,
-                                CONF_URL: base_url,
-                                CONF_HOST: host,
-                                CONF_PORT: port,
-                                CONF_SCAN_INTERVAL: int(user_input[CONF_SCAN_INTERVAL]),
-                            },
-                        )
-                except (ClientError, TimeoutError, ValueError):
-                    errors["base"] = "cannot_connect_local"
-
-        return self.async_show_form(
-            step_id="local",
-            data_schema=vol.Schema({
-                vol.Required(CONF_HOST, default=(user_input or {}).get(CONF_HOST, DEFAULT_LOCAL_HOST)): str,
-                vol.Required(CONF_PORT, default=(user_input or {}).get(CONF_PORT, DEFAULT_LOCAL_PORT)):
-                    vol.All(vol.Coerce(int), vol.Range(min=1, max=65535)),
-                vol.Required(
-                    CONF_SCAN_INTERVAL,
-                    default=(user_input or {}).get(CONF_SCAN_INTERVAL, DEFAULT_LOCAL_SCAN_INTERVAL),
-                ): vol.All(vol.Coerce(int), vol.Range(min=10, max=900)),
-            }),
-            errors=errors,
         )
 
     async def async_step_direct(
