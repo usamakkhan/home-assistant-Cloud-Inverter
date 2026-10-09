@@ -5,6 +5,8 @@ import logging
 from datetime import timedelta
 from typing import Any
 
+import aiohttp
+
 from homeassistant.components.sensor import (
     SensorDeviceClass,
     SensorEntity,
@@ -21,7 +23,9 @@ from homeassistant.const import (
     UnitOfTemperature,
 )
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.aiohttp_client import async_create_clientsession
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.update_coordinator import (
     CoordinatorEntity,
     DataUpdateCoordinator,
@@ -29,6 +33,7 @@ from homeassistant.helpers.update_coordinator import (
 )
 
 from .api import CloudInverterAPI
+from .cloud_identity import cloud_sensor_unique_id, migrate_legacy_sensor_ids
 from .numeric import numeric_state
 from .const import (
     DOMAIN,
@@ -59,7 +64,12 @@ async def async_setup_entry(
     password = entry.data[CONF_PASSWORD]
     goods_id = entry.data.get("goods_id")  # Get the selected inverter ID
     
-    api = CloudInverterAPI(username, password)
+    api = CloudInverterAPI(
+        username,
+        password,
+        async_create_clientsession(hass, cookie_jar=aiohttp.DummyCookieJar()),
+        close_session=True,
+    )
     
     # Set the goods_id directly if provided
     if goods_id:
@@ -68,9 +78,22 @@ async def async_setup_entry(
     
     # Create coordinator
     coordinator = CloudInverterDataUpdateCoordinator(
-        hass, api, int(entry.options.get(CONF_SCAN_INTERVAL, UPDATE_INTERVAL))
+        hass, api, int(entry.options.get(CONF_SCAN_INTERVAL, UPDATE_INTERVAL)), entry.entry_id
     )
-    await coordinator.async_config_entry_first_refresh()
+    try:
+        await coordinator.async_config_entry_first_refresh()
+    except Exception:
+        await api.close()
+        raise
+    entry.runtime_data = coordinator
+
+    # Older versions used the same sensor unique IDs for every cloud inverter.
+    # Update this entry's registry records before adding its new scoped entities;
+    # Home Assistant retains each entity_id and its dashboard references.
+    registry = er.async_get(hass)
+    migrate_legacy_sensor_ids(
+        registry, er.async_entries_for_config_entry(registry, entry.entry_id), entry.entry_id, DOMAIN
+    )
     
     # Create all sensors
     sensors = []
@@ -175,7 +198,7 @@ async def async_setup_entry(
 class CloudInverterDataUpdateCoordinator(DataUpdateCoordinator):
     """Class to manage fetching Cloud Inverter data."""
 
-    def __init__(self, hass: HomeAssistant, api: CloudInverterAPI, interval_seconds: int) -> None:
+    def __init__(self, hass: HomeAssistant, api: CloudInverterAPI, interval_seconds: int, entry_id: str) -> None:
         """Initialize coordinator."""
         super().__init__(
             hass,
@@ -184,6 +207,7 @@ class CloudInverterDataUpdateCoordinator(DataUpdateCoordinator):
             update_interval=timedelta(seconds=max(30, interval_seconds)),
         )
         self.api = api
+        self.entry_id = entry_id
 
     async def _async_update_data(self) -> dict[str, Any]:
         """Fetch data from API."""
@@ -265,7 +289,7 @@ class CloudInverterSensor(CoordinatorEntity, SensorEntity):
         super().__init__(coordinator)
         self._data_key = data_key
         self._attr_name = f"Cloud Inverter {name}"
-        self._attr_unique_id = f"cloud_inverter_{data_key}"
+        self._attr_unique_id = cloud_sensor_unique_id(coordinator.entry_id, data_key)
         self._attr_native_unit_of_measurement = unit
         self._attr_device_class = device_class
         self._attr_state_class = state_class
@@ -304,4 +328,4 @@ class CloudInverterSensor(CoordinatorEntity, SensorEntity):
     @property
     def available(self) -> bool:
         """Return if entity is available."""
-        return self.coordinator.last_update_success and self.coordinator.data is not None
+        return super().available and self.native_value is not None

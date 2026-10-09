@@ -118,6 +118,8 @@ The default is **300 seconds (5 minutes)** because the inverter uploads about th
 
 Credentials are stored in the Home Assistant config entry; the API session token is kept in memory. Protect Home Assistant backups. If website login works but integration login fails, check the portal/API status and share only sanitized logs in an issue.
 
+Accounts with multiple inverters can add a separate CloudInverter.net entry for each inverter. Each entry has its own sensor identities; upgrading existing entries preserves their current entity IDs and dashboard references.
+
 ## 🔄 Upgrading from an older analyzer setup
 
 Version 1.4.0 removes the separate analyzer application and its cached HTTP source. If you previously configured **Local analyzer** in Cloud Inverter, remove that entry from **Settings → Devices & services**, then add **Get Data Locally using Inverter IP**. Enter the **inverter's own LAN IP**, Modbus/TCP port (default `502`), and unit ID (default `1`). An analyzer computer's address or HTTP port cannot be reused as the inverter endpoint. Existing direct LAN and cloud entries continue to use their saved settings.

@@ -4,6 +4,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
+import aiohttp
 import voluptuous as vol
 
 from homeassistant import config_entries
@@ -11,6 +12,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.exceptions import HomeAssistantError
+from homeassistant.helpers.aiohttp_client import async_create_clientsession
 
 from .api import CloudInverterAPI
 from .direct_config import direct_unique_id, parse_direct_settings, probe_direct_inverter
@@ -44,7 +46,12 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
 
 async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str, Any]:
     """Validate the user input allows us to connect."""
-    api = CloudInverterAPI(data[CONF_USERNAME], data[CONF_PASSWORD])
+    api = CloudInverterAPI(
+        data[CONF_USERNAME],
+        data[CONF_PASSWORD],
+        async_create_clientsession(hass, cookie_jar=aiohttp.DummyCookieJar()),
+        close_session=True,
+    )
     
     try:
         if not await api.test_connection():

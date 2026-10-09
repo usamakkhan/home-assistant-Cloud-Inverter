@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.4.3 — 2026-10-09
+
+- Give each CloudInverter.net inverter its own sensor unique IDs, so multiple
+  configured inverters can register their full sensor sets. Migrate existing
+  cloud sensor registry records in place to preserve entity IDs, names, and
+  dashboard references.
+- Use Home Assistant's managed HTTP session for cloud requests.
+- Mark an individual cloud sensor unavailable when its reading is missing or
+  invalid, while leaving other sensors from the same update available.
+
 ## 1.4.2 — 2026-10-09
 
 - Keep cloud energy and other numeric sensors numeric when the portal returns

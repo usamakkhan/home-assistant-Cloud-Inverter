@@ -48,7 +48,14 @@ def signed_payload(payload: dict[str, Any]) -> dict[str, Any]:
 class CloudInverterAPI:
     """Class to communicate with Cloud Inverter API."""
 
-    def __init__(self, username: str, password: str, session: aiohttp.ClientSession = None):
+    def __init__(
+        self,
+        username: str,
+        password: str,
+        session: aiohttp.ClientSession | None = None,
+        *,
+        close_session: bool = False,
+    ):
         """Initialize the API client."""
         self.username = username
         self.password = password
@@ -56,7 +63,7 @@ class CloudInverterAPI:
         self.token = None
         self.member_auto_id = None
         self.goods_id = None
-        self._close_session = False
+        self._close_session = close_session
 
     async def _get_session(self) -> aiohttp.ClientSession:
         """Get aiohttp session."""
