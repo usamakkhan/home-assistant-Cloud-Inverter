@@ -17,7 +17,7 @@ def seconds_until_safe_window(now: float) -> float:
 
 
 def snapshot_payload(snapshot: dict) -> dict:
-    """Shape a direct capture like the analyzer's Home Assistant cache API."""
+    """Shape a direct capture for Home Assistant sensor entities."""
     sensors = snapshot.get("sensors", {})
     if not sensors:
         raise ValueError("Inverter returned no readable telemetry")

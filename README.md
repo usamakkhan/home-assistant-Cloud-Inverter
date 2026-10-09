@@ -10,7 +10,7 @@
 
 Read SolarMax/Senergy inverter telemetry in Home Assistant through **one of two setup choices**:
 
-- 🏠 **Get Data Locally using Inverter IP:** Home Assistant reads the inverter's Modbus/TCP bridge directly. No portal login or separate analyzer process is needed.
+- 🏠 **Get Data Locally using Inverter IP:** Home Assistant reads the inverter's Modbus/TCP bridge directly. No portal login is needed.
 - ☁️ **CloudInverter.net:** Home Assistant reads the vendor's HTTPS API using your portal account.
 
 The integration creates sensor entities for available measurements. It does not provide inverter setting controls. Supported readings vary with device, firmware, and selected source.
@@ -73,7 +73,7 @@ Cloud and direct LAN paths have different field sets. A missing register or port
 2. Copy the entire `custom_components/cloud_inverter` directory into Home Assistant's `/config/custom_components/` directory. The result should contain `/config/custom_components/cloud_inverter/manifest.json`.
 3. Restart Home Assistant, then add **Cloud Inverter** from **Settings → Devices & services**.
 
-See the [detailed installation guide](INSTALL.md) for step-by-step setup, network checks, updating, and the optional standalone analyzer. HACS and manual installation provide the same two setup choices.
+See the [detailed installation guide](INSTALL.md) for step-by-step setup, network checks, and updating. HACS and manual installation provide the same two setup choices.
 
 ## 🏠 Set up direct inverter LAN access
 
@@ -84,7 +84,7 @@ See the [detailed installation guide](INSTALL.md) for step-by-step setup, networ
 5. Submit the form. Home Assistant probes read-only Modbus register `0x1001` and shows the IP, port, unit ID, and returned raw value on a **confirmation page**. Check these before the final submit.
 6. Confirm to create the entry and allow the first full capture. Check the new device's sensors after it completes.
 
-The initial probe confirms that a Modbus response came from the entered endpoint; it does not guarantee that every register on every model/firmware is supported. Direct collection runs **inside Home Assistant**. It does not need the standalone analyzer's HTTP port `8765`.
+The initial probe confirms that a Modbus response came from the entered endpoint; it does not guarantee that every register on every model/firmware is supported. Direct collection runs **inside Home Assistant** on the configured Modbus/TCP port.
 
 > [!CAUTION]
 > A 10-second interval is permitted, but frequent Modbus reads **interrupted cloud delivery and turned the datalogger light red on the reported installation**. Start at 180 seconds, observe the datalogger and portal over multiple five-minute upload cycles, and adjust only if your hardware tolerates it. The collector uses estimated quiet windows near the five-minute boundary; these cannot guarantee uninterrupted cloud uploads because the actual upload phase can vary.
@@ -100,11 +100,11 @@ The default is **300 seconds (5 minutes)** because the inverter uploads about th
 
 Credentials are stored in the Home Assistant config entry; the API session token is kept in memory. Protect Home Assistant backups. If website login works but integration login fails, check the portal/API status and share only sanitized logs in an issue.
 
-## 🧰 Optional standalone analyzer
+## 🔄 Upgrading from an older analyzer setup
 
-The repository also contains [`local_analyzer/`](local_analyzer/README.md), a **separate** SolarMax PV9000 dashboard and history application. You do not need it for either of the two Cloud Inverter setup choices. It can be useful when you want a dedicated local dashboard, stored capture history, or its additional analysis features.
+Version 1.4.0 removes the separate analyzer application and its cached HTTP source. If you previously configured **Local analyzer** in Cloud Inverter, remove that entry from **Settings → Devices & services**, then add **Get Data Locally using Inverter IP**. Enter the **inverter's own LAN IP**, Modbus/TCP port (default `502`), and unit ID (default `1`). An analyzer computer's address or HTTP port cannot be reused as the inverter endpoint. Existing direct LAN and cloud entries continue to use their saved settings.
 
-For a new Home Assistant connection to that separate application, follow its [Home Assistant connector or REST package guide](local_analyzer/home_assistant/README.md). Older **Local analyzer** config entries in Cloud Inverter remain supported, but that entry type is no longer offered as a new setup choice. Avoid running two Modbus collectors against the same inverter unless you deliberately need both and have checked the effect on cloud uploads.
+Removing an old entry may remove its Home Assistant entities. Review dashboards and automations that refer to their entity IDs after adding the direct source.
 
 ## 🔧 Troubleshooting
 
@@ -112,11 +112,11 @@ For a new Home Assistant connection to that separate application, follow its [Ho
 | --- | --- |
 | **Cloud Inverter** is missing after installation | Verify `/config/custom_components/cloud_inverter/manifest.json` exists, remove any extra directory nesting, and restart Home Assistant. |
 | Portal website accepts login but the integration rejects it | Verify the same account, current portal availability, and the sanitized Home Assistant API error. Website and API responses can differ. Never post credentials or tokens. |
-| Direct IP check fails | Verify the inverter IP, Modbus/TCP port (default `502`), unit ID (default `1`), LAN routing, and bridge availability from the Home Assistant host. Port `8765` belongs to the optional analyzer, not direct setup. |
+| Direct IP check fails | Verify the inverter IP, Modbus/TCP port (default `502`), unit ID (default `1`), LAN routing, and bridge availability from the Home Assistant host. |
 | IP check succeeds but sensors are unavailable | The probe checks one register. Verify the PV9000-compatible profile, wait for the full capture and quiet window, then inspect sanitized Modbus errors in Home Assistant logs. |
 | Cloud readings repeat | Check the reading timestamp and allow for the reported **about-five-minute** inverter upload cadence. More frequent API requests can return the same snapshot. |
 | Cloud uploads stop or datalogger turns red | Increase the direct collection interval or stop local collection while you check the hardware. The reported installation had this behavior with 10-second polling. |
-| Optional analyzer readings are old or unavailable | Check its dashboard capture time and `/api/ha` response. Before its first capture, that endpoint can return HTTP `503`. |
+| An older Local analyzer entry fails after updating | Remove that entry and add the direct LAN source using the inverter's own IP and Modbus/TCP port. Review entity IDs used by dashboards and automations. |
 
 Temporary debug logging:
 
@@ -131,6 +131,5 @@ Remove or redact passwords, tokens, account IDs, serials, MAC addresses, and pri
 ## 🧪 Development, support, and license
 
 - Run the integration tests with `python -m unittest discover -s tests -v`. They cover signing, URL validation, direct Modbus checks, capture behavior, and freshness logic; they do not replace a real inverter and Home Assistant test.
-- The standalone analyzer has its own tests under `local_analyzer/tests`; see its [README](local_analyzer/README.md).
 - Review release changes in the [changelog](CHANGELOG.md) and report reproducible problems through [GitHub Issues](https://github.com/usamakkhan/home-assistant-Cloud-Inverter/issues), using sanitized details.
 - This repository uses the [MIT License](LICENSE). Bundled integration icons live in [`brand/`](custom_components/cloud_inverter/brand); [Home Assistant's brand image guidance](https://developers.home-assistant.io/docs/core/integration/brand_images/) explains how Home Assistant displays integration assets.

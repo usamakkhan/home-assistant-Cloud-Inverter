@@ -1,4 +1,4 @@
-"""Check that Home Assistant's bundled profile can capture without the analyzer."""
+"""Check that Home Assistant's bundled profile can capture directly."""
 
 import importlib
 from pathlib import Path
@@ -47,7 +47,7 @@ class PartialModbusClient(FakeModbusClient):
 
 
 class DirectProfileTests(unittest.TestCase):
-    def test_capture_uses_configured_port_and_decodes_without_analyzer(self):
+    def test_capture_uses_configured_port_and_decodes(self):
         FakeModbusClient.created.clear()
         with patch.object(profile, "ModbusClient", FakeModbusClient), patch.object(
             profile.time, "sleep"

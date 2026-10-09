@@ -25,12 +25,10 @@ from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN
-from .local_coordinator import SolarMaxCoordinator
 from .direct_coordinator import DirectSolarMaxCoordinator
 from .direct_config import direct_unique_id
 from .const import (
-    CONF_HOST, CONF_PORT, CONF_SOURCE, CONF_UNIT_ID,
-    DEFAULT_DIRECT_UNIT_ID, SOURCE_DIRECT,
+    CONF_HOST, CONF_PORT, CONF_UNIT_ID, DEFAULT_DIRECT_UNIT_ID,
 )
 
 
@@ -135,18 +133,18 @@ async def async_setup_entry(
     entry: ConfigEntry,
     async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
-    coordinator: SolarMaxCoordinator | DirectSolarMaxCoordinator = entry.runtime_data
+    coordinator: DirectSolarMaxCoordinator = entry.runtime_data
     async_add_entities(SolarMaxSensor(coordinator, entry, description) for description in SENSORS)
 
 
-class SolarMaxSensor(CoordinatorEntity[SolarMaxCoordinator], SensorEntity):
-    """A sensor backed by the analyzer's cached snapshot."""
+class SolarMaxSensor(CoordinatorEntity[DirectSolarMaxCoordinator], SensorEntity):
+    """A sensor backed by Home Assistant's direct Modbus capture."""
 
     _attr_has_entity_name = True
 
     def __init__(
         self,
-        coordinator: SolarMaxCoordinator | DirectSolarMaxCoordinator,
+        coordinator: DirectSolarMaxCoordinator,
         entry: ConfigEntry,
         description: SolarMaxSensorDescription,
     ) -> None:
@@ -171,21 +169,14 @@ class SolarMaxSensor(CoordinatorEntity[SolarMaxCoordinator], SensorEntity):
     @property
     def device_info(self) -> DeviceInfo:
         model = self.coordinator.data.get("model") or "PV9000"
-        direct = self.entry.data.get(CONF_SOURCE) == SOURCE_DIRECT
-        if direct:
-            # Keep the v1.3.0 device identity stable across option changes.
-            unit_id = int(self.entry.data.get(CONF_UNIT_ID, DEFAULT_DIRECT_UNIT_ID))
-            identity = direct_unique_id(
-                self.entry.data[CONF_HOST], self.entry.data[CONF_PORT], unit_id
-            )
-        else:
-            identity = f"local:{self.coordinator.base_url}"
-        info = DeviceInfo(
+        # Keep the v1.3.0 device identity stable across option changes.
+        unit_id = int(self.entry.data.get(CONF_UNIT_ID, DEFAULT_DIRECT_UNIT_ID))
+        identity = direct_unique_id(
+            self.entry.data[CONF_HOST], self.entry.data[CONF_PORT], unit_id
+        )
+        return DeviceInfo(
             identifiers={(DOMAIN, identity)},
-            name="Cloud Inverter Direct" if direct else "Cloud Inverter Local",
+            name="Cloud Inverter Direct",
             manufacturer="SolarMax / Senergy",
             model=model,
         )
-        if not direct:
-            info["configuration_url"] = self.coordinator.base_url
-        return info

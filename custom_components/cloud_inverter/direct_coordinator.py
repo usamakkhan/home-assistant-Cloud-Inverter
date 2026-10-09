@@ -13,7 +13,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 
 from .const import (
     CONF_HOST, CONF_PORT, CONF_UNIT_ID, CONF_SCAN_INTERVAL,
-    DEFAULT_DIRECT_UNIT_ID, DEFAULT_LOCAL_SCAN_INTERVAL, DOMAIN,
+    DEFAULT_DIRECT_UNIT_ID, DEFAULT_DIRECT_SCAN_INTERVAL, DOMAIN,
 )
 from .direct_profile.ha import seconds_until_safe_window, snapshot_payload
 from .direct_profile.profile import read_profile_snapshot
@@ -31,7 +31,7 @@ class DirectSolarMaxCoordinator(DataUpdateCoordinator[dict]):
             CONF_UNIT_ID, entry.data.get(CONF_UNIT_ID, DEFAULT_DIRECT_UNIT_ID)
         ))
         interval = int(entry.options.get(
-            CONF_SCAN_INTERVAL, entry.data.get(CONF_SCAN_INTERVAL, DEFAULT_LOCAL_SCAN_INTERVAL)
+            CONF_SCAN_INTERVAL, entry.data.get(CONF_SCAN_INTERVAL, DEFAULT_DIRECT_SCAN_INTERVAL)
         ))
         self._metadata_cache: dict = {}
         self._capture_lock = asyncio.Lock()

@@ -55,18 +55,15 @@
       "init": {
         "data": {
           "scan_interval": "Refresh interval (seconds)",
-          "host": "Host or IP",
-          "port": "TCP port",
+          "host": "Inverter LAN IP",
+          "port": "Inverter Modbus/TCP port",
           "unit_id": "Modbus unit ID"
         },
-        "description": "Change the host, port, or refresh interval. For direct mode, the interval controls inverter collection; for analyzer mode, it controls cache reads.",
-        "title": "Refresh interval"
+        "description": "Change the inverter LAN IP, Modbus/TCP port, unit ID, or collection interval for direct mode. Cloud mode changes the API refresh interval.",
+        "title": "Connection and refresh settings"
       }
     },
     "error": {
-      "invalid_response": "The host and port did not return a SolarMax analyzer configuration.",
-      "cannot_connect_local": "Cannot reach the local analyzer. Check its host, port, and LAN connection.",
-      "invalid_host": "Enter only the analyzer host or IP in Host and a port from 1 to 65535.",
       "invalid_direct_host": "Enter the inverter's LAN IP address, a valid port, and a Modbus unit ID from 0 to 255.",
       "cannot_read_direct": "Could not read the inverter over Modbus/TCP. Check its IP, port, unit ID, and LAN access."
     }

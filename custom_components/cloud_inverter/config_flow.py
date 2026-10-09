@@ -4,7 +4,6 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from aiohttp import ClientError
 import voluptuous as vol
 
 from homeassistant import config_entries
@@ -12,27 +11,23 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.exceptions import HomeAssistantError
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api import CloudInverterAPI
 from .direct_config import direct_unique_id, parse_direct_settings, probe_direct_inverter
-from .local_api import build_analyzer_url, is_analyzer_config, split_analyzer_url
 from .const import (
     DOMAIN,
     CONF_USERNAME,
     CONF_PASSWORD,
     CONF_SOURCE,
     SOURCE_CLOUD,
-    SOURCE_LOCAL,
     SOURCE_DIRECT,
-    CONF_URL,
     CONF_HOST,
     CONF_PORT,
     CONF_UNIT_ID,
     CONF_SCAN_INTERVAL,
     DEFAULT_DIRECT_PORT,
     DEFAULT_DIRECT_UNIT_ID,
-    DEFAULT_LOCAL_SCAN_INTERVAL,
+    DEFAULT_DIRECT_SCAN_INTERVAL,
     MIN_CLOUD_SCAN_INTERVAL,
     UPDATE_INTERVAL,
 )
@@ -151,7 +146,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     vol.All(vol.Coerce(int), vol.Range(min=0, max=255)),
                 vol.Required(
                     CONF_SCAN_INTERVAL,
-                    default=(user_input or {}).get(CONF_SCAN_INTERVAL, DEFAULT_LOCAL_SCAN_INTERVAL),
+                    default=(user_input or {}).get(CONF_SCAN_INTERVAL, DEFAULT_DIRECT_SCAN_INTERVAL),
                 ): vol.All(vol.Coerce(int), vol.Range(min=10, max=900)),
             }),
             errors=errors,
@@ -339,32 +334,11 @@ class CloudInverterOptionsFlow(config_entries.OptionsFlowWithReload):
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
         """Show the interval field and reload the entry after a change."""
-        local = self.config_entry.data.get(CONF_SOURCE) == SOURCE_LOCAL
         direct = self.config_entry.data.get(CONF_SOURCE) == SOURCE_DIRECT
         errors: dict[str, str] = {}
         if user_input is not None:
             options = {CONF_SCAN_INTERVAL: int(user_input[CONF_SCAN_INTERVAL])}
-            if local:
-                try:
-                    scheme, _, _ = split_analyzer_url(self.config_entry.data[CONF_URL])
-                    host = str(user_input[CONF_HOST]).strip()
-                    port = int(user_input[CONF_PORT])
-                    base_url = build_analyzer_url(host, port, scheme)
-                except ValueError:
-                    errors["base"] = "invalid_host"
-                else:
-                    try:
-                        session = async_get_clientsession(self.hass)
-                        async with session.get(f"{base_url}/api/config", timeout=10) as response:
-                            response.raise_for_status()
-                            config = await response.json()
-                        if not is_analyzer_config(config):
-                            errors["base"] = "invalid_response"
-                        else:
-                            options.update({CONF_HOST: host, CONF_PORT: port})
-                    except (ClientError, TimeoutError, ValueError):
-                        errors["base"] = "cannot_connect_local"
-            elif direct:
+            if direct:
                 try:
                     host, port, unit_id = parse_direct_settings(
                         user_input[CONF_HOST], user_input[CONF_PORT], user_input[CONF_UNIT_ID]
@@ -383,21 +357,13 @@ class CloudInverterOptionsFlow(config_entries.OptionsFlowWithReload):
             if not errors:
                 return self.async_create_entry(data=options)
 
-        default = DEFAULT_LOCAL_SCAN_INTERVAL if (local or direct) else UPDATE_INTERVAL
+        default = DEFAULT_DIRECT_SCAN_INTERVAL if direct else UPDATE_INTERVAL
         current = self.config_entry.options.get(
             CONF_SCAN_INTERVAL,
             self.config_entry.data.get(CONF_SCAN_INTERVAL, default),
         )
         fields = {}
-        if local:
-            _, saved_host, saved_port = split_analyzer_url(self.config_entry.data[CONF_URL])
-            fields[vol.Required(CONF_HOST, default=(user_input or {}).get(
-                CONF_HOST, self.config_entry.options.get(CONF_HOST, self.config_entry.data.get(CONF_HOST, saved_host))
-            ))] = str
-            fields[vol.Required(CONF_PORT, default=(user_input or {}).get(
-                CONF_PORT, self.config_entry.options.get(CONF_PORT, self.config_entry.data.get(CONF_PORT, saved_port))
-            ))] = vol.All(vol.Coerce(int), vol.Range(min=1, max=65535))
-        elif direct:
+        if direct:
             fields[vol.Required(CONF_HOST, default=(user_input or {}).get(
                 CONF_HOST, self.config_entry.options.get(CONF_HOST, self.config_entry.data[CONF_HOST])
             ))] = str
@@ -410,7 +376,7 @@ class CloudInverterOptionsFlow(config_entries.OptionsFlowWithReload):
                 )
             ))] = vol.All(vol.Coerce(int), vol.Range(min=0, max=255))
         fields[vol.Required(CONF_SCAN_INTERVAL, default=(user_input or {}).get(CONF_SCAN_INTERVAL, current))] = vol.All(
-            vol.Coerce(int), vol.Range(min=10 if (local or direct) else MIN_CLOUD_SCAN_INTERVAL, max=900)
+            vol.Coerce(int), vol.Range(min=10 if direct else MIN_CLOUD_SCAN_INTERVAL, max=900)
         )
         return self.async_show_form(
             step_id="init",

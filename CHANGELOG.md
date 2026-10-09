@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.4.0 — 2026-10-09
+
+- Remove the former standalone analyzer application, its companion Home
+  Assistant connector, and the legacy cached HTTP source from this repository.
+- Keep direct inverter LAN collection inside Home Assistant as the local
+  setup choice. Existing direct and cloud entries continue to work.
+- Older Local analyzer entries require manual replacement with a direct LAN
+  entry because they do not contain the inverter's LAN IP. Review old entity
+  IDs in dashboards and automations after replacement.
+- Simplify source specific code, translations, and installation instructions.
+
 ## 1.3.5 — 2026-10-09
 
 - Change the default CloudInverter.net API refresh from 30 to 300 seconds to
@@ -22,24 +33,18 @@
 
 - Simplify new Cloud Inverter setup to two choices: **Direct inverter LAN**
   and **CloudInverter.net**.
-- Keep existing Local analyzer config entries and their Options working.
-  New installations that need the separate analyzer dashboard can use its
-  standalone Home Assistant connector or REST package.
+- Keep direct LAN collection as the local setup choice.
 - Update setup and installation documentation to match the two-choice flow.
 
 ## 1.3.2 — 2026-10-09
 
 - Display the existing integration icon in the repository README.
-- Include a favicon for the separate local analyzer dashboard.
 - Document when Home Assistant can show bundled integration brand images.
 
 ## 1.3.1 — 2026-10-09
 
 - Keep valid local sensors available when one optional PV9000 register block
   cannot be read, while marking that capture as incomplete.
-- Allow the separate analyzer's Home Assistant cache to remain available
-  through normal cooperative quiet windows; stale or undated samples still
-  become unavailable.
 - Add a configurable Modbus unit ID to direct Home Assistant setup and
   Options. The default remains 1, with existing device identities preserved.
 - Make direct LAN collection the default setup choice.
@@ -49,32 +54,17 @@
 
 ## 1.3.0 — 2026-10-09
 
-- Add **Direct inverter LAN** as a third Cloud Inverter source. Home
-  Assistant runs the read-only SolarMax PV9000 Modbus capture and sensor
-  mapping itself, without a separate analyzer process.
+- Add **Direct inverter LAN** collection inside Home Assistant using the
+  read-only SolarMax PV9000 Modbus profile and sensor mapping.
 - Add separate inverter IP and Modbus/TCP port fields (default 502), plus an
   editable collection interval (default 180 seconds).
 - Delay captures around heuristic cloud upload windows and document the
-  limits of this precaution. Keep the separate analyzer option for its
-  dashboard and history.
+  limits of this precaution.
 - Add direct setup instructions and capture tests using sample LAN data.
 
 ## 1.2.0 — 2026-10-09
 
 - Generate fresh CloudInverter.net API signatures for requests and report
   authentication failures separately from accounts with no inverter groups.
-- Add a local analyzer source to the Cloud Inverter Home Assistant integration.
-  It reads the analyzer's cached LAN endpoint without another inverter
-  connection or cloud credentials.
-- Add editable Home Assistant refresh intervals. The local source defaults to
-  180 seconds; cloud refresh defaults to 30 seconds.
-- Give the local source separate Host and Port settings. Port defaults to
-  8765 and can be changed during setup or in Options.
-- Add the SolarMax PV9000 local analyzer and its Home Assistant alternatives.
-  Inverter collection is off by default; Cooperative collection has a
-  recommended 180-second target.
-- Add detailed installation, operation, and troubleshooting documentation.
-  Examples use sample addresses and serials instead of personal device data.
-
-The local analyzer is a separate application. Its own version is currently
-0.12.0.
+- Add editable Home Assistant refresh intervals and detailed installation
+  and troubleshooting documentation using sample device identifiers.

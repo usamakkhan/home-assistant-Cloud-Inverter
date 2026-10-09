@@ -21,18 +21,14 @@ CONF_MEMBER_AUTO_ID = "member_auto_id"
 CONF_TOKEN = "token"
 CONF_SOURCE = "source"
 SOURCE_CLOUD = "cloud"
-SOURCE_LOCAL = "local"
 SOURCE_DIRECT = "direct"
-CONF_URL = "url"
 CONF_HOST = "host"
 CONF_PORT = "port"
 CONF_UNIT_ID = "unit_id"
 CONF_SCAN_INTERVAL = "scan_interval"
-DEFAULT_LOCAL_HOST = "192.168.50.20"
-DEFAULT_LOCAL_PORT = 8765
 DEFAULT_DIRECT_PORT = 502
 DEFAULT_DIRECT_UNIT_ID = 1
-DEFAULT_LOCAL_SCAN_INTERVAL = 180
+DEFAULT_DIRECT_SCAN_INTERVAL = 180
 
 # Cloud API polling (seconds). The inverter uploads to the vendor roughly every
 # five minutes on the reported installation; faster polling usually repeats data.
