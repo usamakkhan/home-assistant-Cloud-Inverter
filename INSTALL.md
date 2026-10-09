@@ -10,7 +10,7 @@ it is not a new Cloud Inverter setup choice.
 | Source | You need | Default Home Assistant refresh |
 | --- | --- | --- |
 | CloudInverter.net | A working portal account, an inverter associated with it, and internet access from Home Assistant | 30 seconds |
-| Direct inverter LAN | Home Assistant can reach the SolarMax PV9000 Modbus/TCP bridge on your LAN; no separate analyzer process | 180 seconds |
+| Get Data Locally using Inverter IP | Home Assistant can reach the SolarMax PV9000 Modbus/TCP bridge on your LAN; no separate analyzer process | 180 seconds |
 
 Download the repository with **Code → Download ZIP** on
 [GitHub](https://github.com/usamakkhan/home-assistant-Cloud-Inverter), or clone
@@ -93,14 +93,18 @@ LAN bridge and you do not need the separate analyzer dashboard or history.
    Modbus/TCP port. The usual port is **502**; the setup form lets you change
    it. No HTTP analyzer port is required.
 2. In Home Assistant, open **Settings → Devices & services → Add integration →
-   Cloud Inverter** and choose **Direct inverter LAN**.
+   Cloud Inverter** and choose **Get Data Locally using Inverter IP**.
 3. Enter the inverter's IP in **Inverter LAN IP**. Use an IP address such as
    `192.168.50.10`, not a URL or the analyzer's IP.
 4. Leave **Inverter Modbus/TCP port** at **502** and **Modbus unit ID** at **1**
    unless your bridge uses different values. Leave **Inverter collection
    interval** at **180 seconds**.
-5. Finish setup. Home Assistant performs a read-only capture and creates the
-   local sensors. The first capture can wait for a cloud quiet window.
+5. Submit the address form to run a read-only Modbus check of register
+   `0x1001`. No integration entry is saved yet. If the IP, port, unit ID, or
+   bridge response is wrong, the form shows an error so you can correct it.
+6. Review the result page showing the tested IP, port, unit ID, and raw
+   register value. Submit again to create the entry. Home Assistant then
+   performs its first full capture, which can wait for a cloud quiet window.
 
 The integration performs the read itself inside Home Assistant's executor;
 there is no separate Python command, analyzer server, or open HTTP port.

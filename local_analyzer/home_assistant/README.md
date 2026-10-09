@@ -17,7 +17,7 @@ PV9000 Wi-Fi bridge --Modbus/TCP--> local_analyzer/app.py
 
 There are three current ways to use local readings with Home Assistant:
 
-1. **Cloud Inverter integration → Direct inverter LAN**: Home Assistant reads
+1. **Cloud Inverter integration → Get Data Locally using Inverter IP**: Home Assistant reads
    the PV9000 bridge itself. No separate analyzer process is needed; see the
    [direct installation steps](../../INSTALL.md#2b-connect-directly-from-home-assistant).
 2. **Standalone SolarMax Local Cloud Connector**: the

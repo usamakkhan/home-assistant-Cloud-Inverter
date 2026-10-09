@@ -15,7 +15,7 @@ from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api import CloudInverterAPI
-from .direct_config import direct_unique_id, parse_direct_settings, probe_direct_endpoint
+from .direct_config import direct_unique_id, parse_direct_settings, probe_direct_inverter
 from .local_api import build_analyzer_url, is_analyzer_config, split_analyzer_url
 from .const import (
     DOMAIN,
@@ -85,6 +85,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self.password = None
         self.api = None
         self.inverters = []
+        self._direct_data: dict[str, Any] | None = None
+        self._direct_probe_value: int | None = None
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
@@ -99,7 +101,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             step_id="user",
             data_schema=vol.Schema({
                 vol.Required(CONF_SOURCE, default=SOURCE_DIRECT): vol.In({
-                    SOURCE_DIRECT: "Direct inverter LAN (runs in Home Assistant)",
+                    SOURCE_DIRECT: "Get Data Locally using Inverter IP",
                     SOURCE_CLOUD: "CloudInverter.net",
                 }),
             }),
@@ -111,6 +113,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Configure read-only Modbus collection inside Home Assistant."""
         errors: dict[str, str] = {}
         if user_input is not None:
+            self._direct_data = None
+            self._direct_probe_value = None
             try:
                 host, port, unit_id = parse_direct_settings(
                     user_input[CONF_HOST], user_input[CONF_PORT], user_input[CONF_UNIT_ID]
@@ -119,22 +123,23 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 errors["base"] = "invalid_direct_host"
             else:
                 try:
-                    await probe_direct_endpoint(host, port)
-                except (OSError, TimeoutError):
-                    errors["base"] = "cannot_connect_direct"
+                    probe_value = await self.hass.async_add_executor_job(
+                        probe_direct_inverter, host, port, unit_id
+                    )
+                except (OSError, ConnectionError, TimeoutError):
+                    errors["base"] = "cannot_read_direct"
                 else:
                     await self.async_set_unique_id(direct_unique_id(host, port, unit_id))
                     self._abort_if_unique_id_configured()
-                    return self.async_create_entry(
-                        title="Cloud Inverter Direct",
-                        data={
-                            CONF_SOURCE: SOURCE_DIRECT,
-                            CONF_HOST: host,
-                            CONF_PORT: port,
-                            CONF_UNIT_ID: unit_id,
-                            CONF_SCAN_INTERVAL: int(user_input[CONF_SCAN_INTERVAL]),
-                        },
-                    )
+                    self._direct_data = {
+                        CONF_SOURCE: SOURCE_DIRECT,
+                        CONF_HOST: host,
+                        CONF_PORT: port,
+                        CONF_UNIT_ID: unit_id,
+                        CONF_SCAN_INTERVAL: int(user_input[CONF_SCAN_INTERVAL]),
+                    }
+                    self._direct_probe_value = probe_value
+                    return await self.async_step_direct_confirm()
         return self.async_show_form(
             step_id="direct",
             data_schema=vol.Schema({
@@ -149,6 +154,28 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 ): vol.All(vol.Coerce(int), vol.Range(min=10, max=900)),
             }),
             errors=errors,
+        )
+
+    async def async_step_direct_confirm(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Create the entry only after the user sees a successful Modbus check."""
+        if self._direct_data is None:
+            return await self.async_step_direct()
+        if user_input is not None:
+            return self.async_create_entry(
+                title="Cloud Inverter Direct",
+                data=self._direct_data,
+            )
+        return self.async_show_form(
+            step_id="direct_confirm",
+            data_schema=vol.Schema({}),
+            description_placeholders={
+                "host": self._direct_data[CONF_HOST],
+                "port": str(self._direct_data[CONF_PORT]),
+                "unit_id": str(self._direct_data[CONF_UNIT_ID]),
+                "register_value": str(self._direct_probe_value),
+            },
         )
 
     async def async_step_cloud(
@@ -345,9 +372,11 @@ class CloudInverterOptionsFlow(config_entries.OptionsFlowWithReload):
                     errors["base"] = "invalid_direct_host"
                 else:
                     try:
-                        await probe_direct_endpoint(host, port)
-                    except (OSError, TimeoutError):
-                        errors["base"] = "cannot_connect_direct"
+                        await self.hass.async_add_executor_job(
+                            probe_direct_inverter, host, port, unit_id
+                        )
+                    except (OSError, ConnectionError, TimeoutError):
+                        errors["base"] = "cannot_read_direct"
                     else:
                         options.update({CONF_HOST: host, CONF_PORT: port, CONF_UNIT_ID: unit_id})
             if not errors:

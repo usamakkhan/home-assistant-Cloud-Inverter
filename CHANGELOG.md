@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.3.4 — 2026-10-09
+
+- Rename the direct setup choice to **Get Data Locally using Inverter IP**.
+- Before saving a direct entry, test the configured IP, TCP port, and Modbus
+  unit ID with a read-only PV9000 register request. Show the response in a
+  separate confirmation step.
+- Use the same Modbus check when changing direct connection settings in
+  Options, and explain test failures in the setup form.
+
 ## 1.3.3 — 2026-10-09
 
 - Simplify new Cloud Inverter setup to two choices: **Direct inverter LAN**

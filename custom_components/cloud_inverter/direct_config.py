@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-import asyncio
 import ipaddress
+
+from .direct_profile.modbus import ModbusClient
 
 
 def parse_direct_settings(host: str, port: int, unit_id: int) -> tuple[str, int, int]:
@@ -24,8 +25,10 @@ def direct_unique_id(host: str, port: int, unit_id: int) -> str:
     return identity if unit_id == 1 else f"{identity}:{unit_id}"
 
 
-async def probe_direct_endpoint(host: str, port: int) -> None:
-    """Check TCP reachability without sending any inverter command."""
-    _, writer = await asyncio.wait_for(asyncio.open_connection(host, port), timeout=5)
-    writer.close()
-    await writer.wait_closed()
+def probe_direct_inverter(host: str, port: int, unit_id: int) -> int:
+    """Verify one read-only PV9000 register through the selected Modbus unit."""
+    with ModbusClient(host, port=port, timeout=4) as client:
+        result = client.read_holding_registers(0x1001, 1, unit_id)
+    if not result.ok or not result.registers:
+        raise ConnectionError("Inverter did not return PV9000 register 0x1001")
+    return result.registers[0]

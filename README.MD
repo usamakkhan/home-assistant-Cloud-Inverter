@@ -12,13 +12,13 @@ The repository is available under the [MIT License](LICENSE).
 | Source | Where readings come from | Credentials | Default Home Assistant refresh |
 | --- | --- | --- | --- |
 | CloudInverter.net | The vendor's HTTPS API | CloudInverter username and password | 30 seconds |
-| Direct inverter LAN | Home Assistant reads the SolarMax PV9000 Modbus/TCP bridge itself | No cloud login or separate analyzer | 180 seconds |
+| Get Data Locally using Inverter IP | Home Assistant reads the SolarMax PV9000 Modbus/TCP bridge itself | No cloud login or separate analyzer | 180 seconds |
 
 Choose a source when adding the integration. Existing **Local analyzer**
 config entries continue to work, but new setup offers the direct LAN choice
 instead of requiring a separate analyzer process.
 
-**Direct inverter LAN** runs the read-only PV9000 capture inside Home
+**Get Data Locally using Inverter IP** runs the read-only PV9000 capture inside Home
 Assistant. Enter the inverter's LAN IP, Modbus/TCP port (default 502), and
 Modbus unit ID (default 1).
 The integration spaces captures at 180 seconds by default and avoids
@@ -87,10 +87,11 @@ been implemented. Other device models are not guaranteed to expose all fields.
 
 ## Add the direct LAN source
 
-Choose **Direct inverter LAN** in the setup form and follow the
+Choose **Get Data Locally using Inverter IP** in the setup form and follow the
 [direct setup steps](INSTALL.md#2b-connect-directly-from-home-assistant).
-It reads the inverter within Home Assistant, with a 180-second collection
-interval and an editable Modbus/TCP port and unit ID.
+Enter the inverter IP, port, and unit ID. Setup checks a read-only Modbus
+register and shows the result before you confirm the entry. Collection then
+runs within Home Assistant at a default 180-second interval.
 
 The [separate analyzer](local_analyzer/README.md) remains available as an
 optional dashboard and history application. To connect it to Home Assistant
