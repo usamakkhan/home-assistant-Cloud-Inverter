@@ -1,163 +1,186 @@
-# SolarMax Local Cloud Connector for Home Assistant
+# Use the SolarMax local analyzer with Home Assistant
 
-This is the **second application**. It is deliberately separate from the
-SolarMax Local Cloud replacement in the project root:
+The analyzer runs on a computer that can reach the inverter's LAN Modbus/TCP
+bridge. Home Assistant reads the analyzer's cached `/api/ha` response over
+HTTP. The dashboard and Home Assistant share one primary collector; adding a
+Home Assistant integration does **not** create another inverter connection.
 
-1. **SolarMax Local Cloud** (`app.py`) talks to the inverter once, owns the
-   historical analyzer/dashboard and caches telemetry.
-2. **SolarMax Local Cloud Connector** (this folder) runs inside Home Assistant,
-   reads only the first application's HTTP cache, and creates HA entities.
-
-The connector contains no Modbus client and cannot scan, configure or write to
-the inverter.
-
-The recommended architecture is:
-
-`Inverter Wi-Fi module → SolarMax Local Cloud → cached /api/ha → HA Connector`
-
-This prevents Home Assistant and the browser dashboard from opening competing
-Modbus sessions to the rate-sensitive ESP bridge. The analyzer performs one
-safe read cycle and both the local GUI and Home Assistant consume its cache.
-
-## Before you start
-
-- Keep the analyzer running on a computer that can reach the inverter over your
-  LAN. Home Assistant must be able to reach that computer on TCP port `8765`.
-- Find the inverter's LAN IP and the analyzer computer's LAN IP. Replace
-  `INVERTER_LAN_IP` and `ANALYZER_LAN_IP` below with those two different values.
-  The `192.168.50.x` addresses in the sample files are examples.
-- The analyzer itself runs on the other computer. Home Assistant can use the
-  **Cloud Inverter** integration's Local analyzer option or the standalone
-  connector in this folder. Choose one to avoid duplicate entities.
-
-## 1. Run the analyzer as a LAN service
-
-On the separate always-on Windows/Linux computer containing the local-cloud
-application, run:
-
-```powershell
-python app.py --no-browser --bind 0.0.0.0 --monitor-interval 180 --monitor-mode cooperative --monitor-host INVERTER_LAN_IP
+```text
+PV9000 Wi-Fi bridge --Modbus/TCP--> local_analyzer/app.py
+                                      |-- dashboard and SQLite history
+                                      +-- cached /api/ha --> Home Assistant
 ```
 
-Run the command from the extracted `SolarMax-local-analyzer` folder. Keep the
-terminal open or configure the command as a service after verifying it works.
-The computer must have a stable LAN address. Restrict inbound TCP 8765 in its
-firewall to the Home Assistant host and trusted administration devices. Never
-forward port 8765 or inverter port 502 from the router to the internet.
+There are three alternatives for Home Assistant:
 
-Verify from another LAN device or from the Home Assistant host in a browser:
+1. **Cloud Inverter integration → Local analyzer**: recommended. It is part of
+   this repository's main Home Assistant integration and asks for Host, Port,
+   and Home Assistant cache scan interval. It needs no cloud credentials.
+2. **Standalone SolarMax Local Cloud Connector**: the
+   `custom_components/solarmax_pv9000` directory in this folder. It asks for
+   the analyzer's full base URL and a cache scan interval.
+3. **REST package**: `solarmax_rest_package.yaml` creates a smaller set of
+   sensors without a custom integration.
+
+Choose **one** option per analyzer so the same readings do not appear twice.
+The cloud-login source of the main Cloud Inverter integration is a separate
+choice and does not use this analyzer.
+
+## 1. Start the analyzer
+
+From the `local_analyzer` directory on an always-on computer, replace
+`INVERTER_LAN_IP` with your inverter Wi-Fi bridge's address:
+
+```shell
+python app.py --no-browser --bind 0.0.0.0 --port 8765 --no-peer-api --monitor-host INVERTER_LAN_IP --monitor-interval 180 --monitor-mode cooperative
+```
+
+Python 3.11 or newer is needed for the analyzer. The command starts a
+Cooperative local collector with a 180-second target and exposes the cached
+HTTP API on port `8765`. `--no-peer-api` avoids opening the optional neighbor
+comparison port; omit it if you use the comparison service.
+
+To use another analyzer HTTP port, change `--port`, for example:
+
+```shell
+python app.py --no-browser --bind 0.0.0.0 --port 9000 --no-peer-api --monitor-host INVERTER_LAN_IP --monitor-interval 180 --monitor-mode cooperative
+```
+
+Then enter **Port 9000** in the main Home Assistant integration or
+`http://ANALYZER_LAN_IP:9000` in the standalone connector. The inverter's
+Modbus/TCP port is a separate service, normally `502`; do not enter `502` as
+the analyzer HTTP port.
+
+The analyzer binds to `127.0.0.1` if `--bind` is omitted. Use
+`--bind 0.0.0.0` only when Home Assistant is on another computer and the LAN
+firewall restricts access to trusted clients. The HTTP API has no general
+login; some endpoints can change collection mode or start diagnostics.
+Do not forward the analyzer or inverter ports from your router.
+
+The analyzer starts in Original/cloud-only mode if no `--monitor-interval` is
+given. In that mode it does not perform automatic inverter captures and
+`/api/ha` returns HTTP 503 until a real sample exists. The sample addresses
+in the source are placeholders; set your own inverter and analyzer LAN
+addresses locally.
+
+## 2. Verify reachability
+
+From a device on the same network as Home Assistant, open:
 
 ```text
 http://ANALYZER_LAN_IP:8765/api/config
 http://ANALYZER_LAN_IP:8765/api/ha
 ```
 
-`/api/config` should return JSON. `/api/ha` should show the cached readings after
-the first successful inverter capture. With the 180-second Cooperative target,
-allow a few minutes; cloud quiet windows can extend the gap. Missing readings
-remain missing instead of being replaced with sample values. Leave inverter
-controls disabled when adding the connector; its setup checks for read-only mode.
+Use your chosen port in both URLs. `/api/config` should return analyzer
+metadata and collector status. `/api/ha` returns the latest cached snapshot
+after a successful capture; HTTP 503 before then is expected. Cooperative
+quiet windows and capture time can make the first wait longer than three
+minutes.
 
-## 2. Add it through the Cloud Inverter integration (recommended)
+`0.0.0.0` is a bind address, **not** the Host or URL to enter in Home
+Assistant. Use the analyzer computer's reachable LAN IP or hostname.
 
-If you installed **Cloud Inverter** through HACS or copied
-`custom_components/cloud_inverter` into Home Assistant, restart Home Assistant,
-then open **Settings → Devices & services → Add integration**. Search for
-**Cloud Inverter**, choose **Local analyzer**, and enter
-`ANALYZER_LAN_IP` in **Host** and `8765` in **Port**. Port `8765` is the default;
-change it if you started the analyzer with another `--port` value. Keep the
-default 180-second cache scan interval or choose another value. No
-CloudInverter.net username or password is required. Enter only the host in its
-field, without `http://` or `/api/ha`. After setup, check the new device's
-sensors after the first successful analyzer capture. You can change the host,
-port, or Home Assistant cache scan interval later under the integration's
-**Configure/Options** menu.
-To change the inverter collection target, use the analyzer dashboard's
-collection controls; its preset is 180 seconds.
+## 3. Recommended: Cloud Inverter's Local analyzer option
 
-## 3. Standalone connector (alternative)
+Install the repository's `custom_components/cloud_inverter` with HACS or
+copy it to `/config/custom_components/cloud_inverter`, then restart Home
+Assistant. Open **Settings → Devices & services → Add integration**, search
+for **Cloud Inverter**, and choose **Local analyzer**.
 
-1. Open Home Assistant's `/config` directory using its file editor, Samba share,
-   SSH, or another file transfer method. Create `custom_components` if needed.
-2. Copy the entire `home_assistant/custom_components/solarmax_pv9000` folder
-   from this package into `/config/custom_components/solarmax_pv9000`.
-   Check that `/config/custom_components/solarmax_pv9000/manifest.json` exists;
-   do not add an extra `custom_components` directory level.
-3. Restart Home Assistant.
-4. Open **Settings → Devices & services → Add integration** and search for
-   **SolarMax Local Cloud Connector**.
-5. Enter the analyzer URL in the form `http://ANALYZER_LAN_IP:8765` (no
-   `/api/ha` suffix and no `0.0.0.0`). Keep the default scan interval at
-   **180 seconds**, then submit the form.
-6. Open the new SolarMax device in **Settings → Devices & services** and check
-   that its sensors show readings after the first successful capture.
+| Field | Enter | Default |
+| --- | --- | --- |
+| Host | Analyzer computer IP or hostname only, without `http://` or a path | Sample `192.168.50.20`; replace it |
+| Port | Analyzer HTTP port from `--port` | `8765` |
+| Home Assistant cache scan | Seconds between HTTP reads of cached data | `180`; valid range 10–900 |
 
-The HTTP scan reads the analyzer cache and does not trigger another inverter
-request. Cooperative collection targets a new local sample every 180 seconds,
-with longer gaps possible around cloud quiet windows. Ten-second direct
-collection can stop CloudInverter uploads and turn the datalogger indicator red
-on the reported installation.
+No CloudInverter.net username or password is required. After setup, use the
+integration's **Options** menu to change Host, Port, or the Home Assistant
+cache scan interval. The setup and Options forms verify that Host and Port
+reach a SolarMax analyzer `/api/config` response. A new entry's first sensor
+update still needs a successful `/api/ha` capture.
 
-The integration uses a config entry and a data-update coordinator. It creates
-47 local entities covering PV1/PV2, grid, battery, Backup, GEN, Normal Load,
-voltage, current, frequency, temperature, operating mode, daily energy and
-lifetime energy. It is strictly read-only and exposes no switches, numbers or
-inverter configuration entities.
+The **inverter collection target** is a different setting in the analyzer
+dashboard. It is preset to 180 seconds but starts disabled unless you enable
+collection. Changing the Home Assistant cache scan does not change Modbus
+polling. A 10-second cache scan only rereads the stored HTTP payload; a
+10-second **direct inverter** target can disrupt cloud uploads. On the
+reported installation it stopped CloudInverter uploads and turned the
+datalogger indicator red.
 
-For the Home Assistant Energy Dashboard, use:
+## 4. Standalone connector alternative
 
-- **Solar production:** Solar energy total
-- **Grid consumption:** Grid imported energy total
-- **Return to grid:** Grid exported energy total
-- **Battery energy in:** Battery charged energy total
-- **Battery energy out:** Battery discharged energy total
+The standalone connector has its own domain and is separate from the main
+Cloud Inverter integration:
 
-Copy `lovelace_dashboard.yaml` into a new raw-configuration dashboard if you
-want the supplied starting layout. Home Assistant may choose slightly different
-entity IDs; select the generated entities in the card editor if needed.
+1. Copy this folder's `custom_components/solarmax_pv9000` into
+   `/config/custom_components/solarmax_pv9000`. Verify that
+   `/config/custom_components/solarmax_pv9000/manifest.json` exists.
+2. Restart Home Assistant, add **SolarMax Local Cloud Connector**, and enter
+   the **full base URL**, such as `http://ANALYZER_LAN_IP:8765`. Do not append
+   `/api/ha`.
+3. Keep its 180-second default cache interval or choose 10–300 seconds.
 
-## Troubleshooting
+This connector defines 47 sensor descriptions for PV/MPPT, grid, battery,
+Backup, GEN, Normal Load, operating mode, and energy counters. Availability
+depends on the analyzer payload; a missing value is not made into a zero.
+Its setup expects the analyzer to report read-only mode, so start the
+analyzer without `--enable-inverter-controls` when using this alternative.
+The main Cloud Inverter integration's local option does not impose that
+read-only check.
 
-- **Integration not listed:** Check the `manifest.json` path above, restart
-  Home Assistant, then search again.
-- **Cannot connect during setup:** Open `/api/config` from the Home Assistant
-  network. Check the analyzer process, LAN IP, firewall rule for TCP `8765`, and
-  that the URL uses `http://` with no API suffix. The setup also requires the
-  analyzer to report read-only mode, so start it without inverter controls.
-- **Entities unavailable or blank:** Check `/api/ha` and the analyzer's
-  collection status. Confirm the inverter IP and Modbus/TCP access, then wait
-  for a successful collection cycle. Home Assistant only reads cached results.
-- **Cloud uploads stop or datalogger turns red:** Return the analyzer to
-  Original/cloud-only mode, then try Cooperative mode at 180 seconds. Avoid
-  10-second direct polling on the reported installation.
+## 5. REST package alternative
 
-## 4. REST fallback
-
-If you do not want a custom component, replace `ANALYZER_IP` in
-`solarmax_rest_package.yaml`, place it under `/config/packages`, enable packages
-from `configuration.yaml`, then restart Home Assistant:
+Replace `ANALYZER_IP` in `solarmax_rest_package.yaml` with the analyzer
+computer's IP or hostname and adjust the port if needed. Copy the file to
+`/config/packages/solarmax_rest_package.yaml`. If packages are not already
+enabled, add this to `configuration.yaml`:
 
 ```yaml
 homeassistant:
   packages: !include_dir_named packages
 ```
 
-The REST form creates fewer entities but still uses one HTTP request for the
-shared cached payload. Values are not rounded in either method.
+Restart Home Assistant. The REST package uses a 180-second HTTP scan and
+creates fewer entities than the custom integrations. It does not contact the
+inverter directly.
 
-## Sign conventions
+## Energy Dashboard and sample Lovelace view
 
-- Grid power above zero means import; below zero means feed-in/export.
-- Battery power below zero means charging; above zero means discharging.
-- Backup Load is the essential/light battery-backed circuit.
-- GEN is the high-power circuit for AC, heater and water geyser; its outage
-  availability depends on the configured battery threshold.
-- Normal Load is grid-only and currently unused.
+The local integrations expose named lifetime energy sensors for solar
+generation, grid import/export, and battery charge/discharge where the
+analyzer can provide them. In Home Assistant's Energy Dashboard, select the
+generated entities by their actual names and verify units and increasing
+totals before using them for statistics. Entity IDs are assigned by Home
+Assistant and may differ from examples.
 
-## Configuration control
+`lovelace_dashboard.yaml` is a starter dashboard. It contains example
+`sensor.*` IDs that may need to be replaced with IDs from your installation.
+The same applies to any automations you create from these sensors.
 
-Do not expose inverter settings as Home Assistant switches yet. The analyzer
-has read-back mappings for 16 candidate controls, but Modbus writes, bounds,
-read-after-write verification and rollback are not implemented. Incorrect
-battery, off-grid voltage/frequency or power-limit writes can de-energize
-circuits or damage equipment.
+## Troubleshooting
+
+| Symptom | Check |
+| --- | --- |
+| Integration not shown | Confirm its `manifest.json` is directly under the expected `/config/custom_components/DOMAIN` directory, then restart Home Assistant. |
+| Cannot connect during setup | Test `/api/config` from the Home Assistant network; check the analyzer process, firewall, Host, and Port. |
+| Entry loads but sensors are unavailable | Check `/api/ha`. Confirm a real inverter capture succeeded and the collector is not in Original mode. |
+| Wrong or stale values | Compare the analyzer's captured timestamp, collector status, and stored history. Home Assistant cache scans do not force a fresh inverter read. |
+| Cloud uploads stop or datalogger turns red | Restore Original/cloud-only mode, then try Cooperative collection at 180 seconds. Avoid a 10-second direct inverter target on the reported setup. |
+
+The analyzer database and exported readings can contain device identifiers
+and energy-use patterns. Keep them local and replace account IDs or serials
+with `ABCDE123456789` in shared diagnostics.
+
+## Sign conventions and control scope
+
+For the local mapped measurements, positive grid power means import and
+negative means export. Negative battery power means charging; positive
+means discharging. Backup, GEN, and Normal Load are model-dependent
+circuits, not universally fixed household appliances.
+
+Both Home Assistant integrations and the REST package are sensor-only.
+They do not expose inverter-setting writes. The analyzer has a separate
+experimental physical-control path, disabled by default and deliberately
+guarded with a placeholder serial in this public copy. Do not treat a
+dashboard control candidate as a validated write for another inverter.

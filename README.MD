@@ -1,210 +1,128 @@
- Cloud Inverter Home Assistant Integration
+# Cloud Inverter for Home Assistant
 
-A Home Assistant integration for monitoring Cloud Inverter (SenergyTec) solar systems with real-time data updates.
+A Home Assistant sensor integration with two data sources:
 
-## Local analyzer and Home Assistant connector
+| Source | Where readings come from | Credentials | Default Home Assistant refresh |
+| --- | --- | --- | --- |
+| CloudInverter.net | The vendor's HTTPS API | CloudInverter username and password | 30 seconds |
+| Local analyzer | The analyzer's cached `/api/ha` endpoint on your LAN | No cloud login | 180 seconds |
 
-This integration now offers two sources during setup:
+Choose a source when adding the integration. The local source requires the
+[SolarMax PV9000 analyzer](local_analyzer/README.md) to run separately on a
+computer that can reach the inverter. Home Assistant reads its cached HTTP
+response; it does not open another Modbus connection. Existing cloud entries
+continue to use the cloud source.
 
-- **CloudInverter.net:** sign in with your cloud account as described below.
-- **Local analyzer:** run the [SolarMax local analyzer](local_analyzer/README.md)
-  on a computer that can reach the inverter. Follow its
-  [LAN setup steps](local_analyzer/home_assistant/README.md#1-run-the-analyzer-as-a-lan-service),
-  then choose **Local analyzer** when adding **Cloud Inverter** in Home Assistant.
-  Enter the analyzer host (for example `192.168.50.20`) and port in separate
-  fields. Port defaults to `8765` and can be changed. Keep the 180-second cache
-  scan default or enter another value from 10 to 900 seconds. No CloudInverter
-  login is needed.
+## What is included
 
-The local option reads the analyzer's cached `/api/ha` feed. It does not make
-another Modbus connection to the inverter. Enter your own LAN addresses; the
-repository uses sample IPs and `ABCDE123456789` in place of a real serial.
-After setup, open the integration's **Configure** or **Options** menu to change
-the analyzer host, port, or Home Assistant refresh interval. The inverter's actual collection target
-is a separate setting in the analyzer dashboard's collection controls (180
-seconds by default). Cooperative cloud quiet windows can extend that target.
-The standalone local connector under `local_analyzer/home_assistant` remains
-available for manual installation; install one connector per analyzer to avoid
-duplicate entities.
+- `custom_components/cloud_inverter/`: the Home Assistant integration. Its cloud
+  path defines 58 sensor descriptions, and its local path defines 47. A sensor
+  can be unavailable when its source has no corresponding measurement.
+- `local_analyzer/`: a standalone Python dashboard and collector for the
+  SolarMax PV9000 family. It is a separate application, not something HACS runs
+  inside Home Assistant.
+- [Home Assistant local setup guide](local_analyzer/home_assistant/README.md):
+  LAN commands, integration steps, a standalone connector alternative, and a
+  REST package.
 
-> Inspired by [DESS Monitor Integration](https://github.com/Antoxa1081/home-assistant-dess-monitor), designed specifically for Cloud Inverter systems.
+Sensor coverage includes PV and MPPT readings, grid import/export, battery
+state and energy, load circuits, and inverter status. The local feed additionally
+exposes the analyzer's mapped PV9000 measurements. Availability depends on the
+device, firmware, portal response, and successful captures. Home Assistant
+assigns entity IDs when entities are created; do not assume a fixed
+`sensor.*` ID from this README.
 
- Features
+## Install the Home Assistant integration
 
-✅ Real-time Monitoring
-- Solar PV power generation (current & daily)
-- Battery status (SOC, SOH, voltage, current)
-- Grid import/export tracking
-- Home load consumption
-- Heavy load monitoring
-- On-grid load (EV charger) support
+### HACS
 
-✅ Multi-MPPT Support
-- Track up to 2 MPPT trackers
-- Individual voltage, current, and power monitoring
+Add `https://github.com/usamakkhan/home-assistant-Cloud-Inverter` as a custom
+**Integration** repository in HACS, install **Cloud Inverter**, and restart Home
+Assistant. Follow HACS's current custom-repository controls if its menu labels
+differ from those shown on your system.
 
-✅ Energy Statistics
-- Daily energy production
-- Total energy production (all-time)
-- Self-consumption rate
-- Self-sufficiency rate
-- Battery charge/discharge tracking
+### Manual
 
-✅ System Information
-- Inverter temperature
-- WiFi signal strength
-- Operating mode and status
-- Firmware versions
-- Real-time connectivity status
+Copy the repository's `custom_components/cloud_inverter` directory to
+`/config/custom_components/cloud_inverter`, including its `manifest.json` and
+translations. Restart Home Assistant. The full directory tree must have only
+one `custom_components` level.
 
- Installation
+## Add a cloud source
 
- Method 1: HACS (Recommended)
+1. In Home Assistant, open **Settings → Devices & services → Add integration**.
+2. Search for **Cloud Inverter** and choose **CloudInverter.net**.
+3. Enter the account username and password. If the account has one inverter,
+   setup selects it automatically; if it has several, choose one from the list.
+4. Check the created device and sensor states after the first update.
 
-1. Open HACS in Home Assistant
-2. Click the three dots (⋯) → Custom Repositories
-3. Add repository:
-   - URL**: `https://github.com/usamakkhan/home-assistant-Cloud-Inverter`
-   - Category**: Integration
-4. Click Add
-5. Search for **"Cloud Inverter"** and install
-6. Restart Home Assistant
+The integration signs each API request from its current fields. The username
+and password are stored in Home Assistant's config entry; the session token is
+held in memory. Protect Home Assistant backups and do not post credentials,
+tokens, cookies, or unredacted logs in issues.
 
- Method 2: Manual Installation
+The cloud coordinator defaults to a 30-second Home Assistant refresh. Its
+**Options** form permits 30–900 seconds. A refresh asks the vendor API for data;
+the API may update the underlying inverter reading on a different schedule.
+Only the SolarMax/Senergy portal response shapes represented in the code have
+been implemented. Other device models are not guaranteed to expose all fields.
 
-1. Download the repository as ZIP
-2. Copy `custom_components/cloud_inverter/` from the archive to `config/custom_components/cloud_inverter/`.
-3. Restart Home Assistant
+## Add a local source
 
- Setup
+1. Start the [local analyzer](local_analyzer/README.md#quick-start) on your LAN.
+   It starts with inverter collection **off** unless you explicitly enable a
+   collector mode. The recommended collection target is 180 seconds in
+   Cooperative mode.
+2. Confirm that `http://ANALYZER_LAN_IP:8765/api/config` responds from the Home
+   Assistant network. Replace `ANALYZER_LAN_IP` with the analyzer computer's
+   address.
+3. Add **Cloud Inverter** in Home Assistant and choose **Local analyzer**.
+4. Enter the analyzer **Host** and **Port** in separate fields. Port defaults to
+   `8765`; change it if you started the analyzer with another `--port` value.
+   Enter only a hostname or IP in Host, without `http://` or `/api/ha`.
+5. Keep the default **Home Assistant cache scan** at 180 seconds or choose
+   10–900 seconds. This interval controls Home Assistant's HTTP cache reads,
+   not how often the analyzer contacts the inverter.
 
- Configuration
+The analyzer dashboard has the separate inverter **collection target** field,
+also preset to 180 seconds. Cooperative cloud quiet windows can delay a sample
+beyond that target. After setup, the integration's **Options** menu can change
+Host, Port, or Home Assistant refresh interval; the analyzer dashboard changes
+the inverter collection interval. The standalone
+`solarmax_pv9000` connector under `local_analyzer/home_assistant` is an
+alternative. Install only one connector for an analyzer to avoid duplicate
+entities.
 
-1. Go to Settings → Devices & Services → Integrations
-2. Click Create Integration → Search for **"Cloud Inverter"**
-3. Choose **CloudInverter.net** or **Local analyzer**.
-4. For cloud, enter your username and password, then select your inverter.
-   For local, enter the analyzer host, port, and cache scan interval (180 seconds by
-   default). See the local analyzer instructions above before choosing local.
-5. Complete setup.
+The source files use sample LAN addresses and `ABCDE123456789` in place of a
+real serial. Replace the sample host locally; no fake measurement is supplied
+before a real capture.
 
-That's it! The integration will automatically create sensors for all your inverter data.
+## Sensor behavior and limits
 
- Supported Devices
+- The integration creates sensor entities only. It does not expose Home
+  Assistant switches or number entities for inverter settings.
+- Missing, empty, or unsupported readings are not assumed to be zero. Cloud
+  and local sources have different field sets and may show different sensor
+  names.
+- Local values are served from the analyzer's latest durable snapshot. If it
+  has never captured a sample, `/api/ha` returns HTTP 503 and setup/update may
+  report the analyzer unavailable.
+- The local analyzer can retain an older cached sample. Check its capture time
+  and collector status when freshness matters.
+- The cloud path depends on the vendor API and internet access. A working
+  website login does not by itself prove every API endpoint is healthy.
 
-- ✅ SM-ONYX-UL-6KW (tested)
-- ✅ Any Cloud Inverter device (model support auto-detection)
+## Troubleshooting
 
- Available Sensors
+| Symptom | Check |
+| --- | --- |
+| Integration not listed | Confirm `/config/custom_components/cloud_inverter/manifest.json` exists, then restart Home Assistant. |
+| Cloud login rejected | Verify credentials and vendor availability. If the website works, report only the sanitized API status/code from logs; remove account IDs, serials, passwords, and tokens. |
+| Local setup cannot connect | From the Home Assistant network, open `http://HOST:PORT/api/config`. Check analyzer process, Host, Port, and firewall. `0.0.0.0` is a bind address, not the Host to enter. |
+| Local sensors unavailable | Check `/api/ha` and the analyzer collector mode. Wait for a successful capture; Cooperative quiet windows can extend the first wait. |
+| Cloud uploads stop or datalogger shows red | Restore the analyzer's Original/cloud-only mode, then try Cooperative mode at 180 seconds. Ten-second direct polling disrupted cloud delivery on the reported installation. |
 
- Solar Production
-- `sensor.solar_pv_current_power` - Real-time solar output
-- `sensor.solar_production_today` - Daily energy
-- `sensor.solar_production_all_time` - Total energy
-- `sensor.peak_power_today` - Peak output
-
- MPPT Tracking
-- `sensor.solar_mppt1_power` - MPPT1 power output
-- `sensor.solar_mppt2_power` - MPPT2 power output
-- `sensor.solar_mppt1_voltage` - MPPT1 voltage
-- `sensor.solar_mppt2_voltage` - MPPT2 voltage
-- `sensor.solar_mppt1_ampere` - MPPT1 current
-- `sensor.solar_mppt2_ampere` - MPPT2 current
-
- Battery Management
-- `sensor.battery_soc` - State of Charge (%)
-- `sensor.battery_soh` - State of Health (%)
-- `sensor.battery_voltage` - Current voltage
-- `sensor.battery_ampere` - Current charging/discharging current
-- `sensor.battery_charge_power` - Charging power
-- `sensor.battery_discharge_power` - Discharging power
-- `sensor.battery_type` - Battery type
-- `sensor.battery_capacity` - Battery capacity
-
- Grid Management
-- `sensor.grid_voltage` - Grid voltage
-- `sensor.grid_current` - Grid current
-- `sensor.grid_frequency` - Grid frequency
-- `sensor.grid_export_today` - Energy exported today
-- `sensor.grid_export_total` - Total energy exported
-- `sensor.grid_import_today` - Energy imported today
-- `sensor.grid_import_total` - Total energy imported
-
- Home Load (EPS)
-- `sensor.home_load_power` - Current consumption
-- `sensor.home_load_today` - Daily consumption
-- `sensor.home_load_total` - Total consumption
-
- Heavy Load (Generator)
-- `sensor.heavy_load_power` - Current usage
-- `sensor.heavy_load_today` - Daily usage
-- `sensor.heavy_load_total` - Total usage
-
- On-Grid Load (EV Charger)
-- `sensor.on_grid_load_power` - Current usage
-- `sensor.on_grid_load_today` - Daily usage
-- `sensor.on_grid_load_total` - Total usage
-
- System Information
-- `sensor.inverter_temperature` - Operating temperature
-- `sensor.inverter_status` - Connection status
-- `sensor.inverter_wifi_strength` - WiFi signal strength
-- `sensor.self_consumption_rate` - Daily self-consumption %
-- `sensor.self_sufficiency_rate` - Daily self-sufficiency %
-
- Configuration Options
-
-The integration uses automatic discovery. No YAML configuration needed!
-
- Update Interval
-
-The default update interval is 60 seconds**. To modify:
-
-1. Go to Settings → Devices & Services
-2. Find your Cloud Inverter device
-3. Click the three dots → System Options
-4. Adjust scan interval as needed
-
- Automations & Templates
-
-Create automations based on sensor values:
-
-```yaml
-automation:
-  - alias: "Low Battery Alert"
-    trigger:
-      platform: numeric_state
-      entity_id: sensor.battery_soc
-      below: 20
-    action:
-      service: notify.notify
-      data:
-        message: "Battery level is below 20%"
-```
-
- API Details
-
-This integration connects to your Cloud Inverter's cloud API:
-- Base URL**: `https://www.cloudinverter.net`
-- Update Frequency**: 60 seconds (configurable)
-- Authentication**: Username + Password. Requests are signed from their current fields.
-
-Home Assistant stores the username and password in the integration's config entry. The cloud API token is kept in memory for the active session. Protect Home Assistant backups and do not share config entries or unredacted logs.
-
- Troubleshooting
-
- Integration won't load
-- Verify your username and password are correct
-- Check your internet connection
-- Ensure your Cloud Inverter device is online
-- If login fails while the website works, enable the logger below and check the `Cloud Inverter login rejected` status and code. Share only those values when reporting the issue; replace account IDs and serial numbers with `ABCDE123456789` and remove passwords, tokens, and cookies.
-
- Sensors showing "unavailable"
-- Check Home Assistant logs for errors
-- Verify inverter is producing data
-- Try reloading the integration
-
- View Logs
+For temporary debug logging, use:
 
 ```yaml
 logger:
@@ -212,22 +130,19 @@ logger:
     custom_components.cloud_inverter: debug
 ```
 
- Contributing
+Review logs before sharing them. The current source files are sanitized, but
+older Git commits may still contain historical example or installation values.
 
-Found an issue? Have a suggestion?
-- 🐛 [Report a bug](https://github.com/usamakkhan/home-assistant-Cloud-Inverter/issues)
-- ✨ [Request a feature](https://github.com/usamakkhan/home-assistant-Cloud-Inverter/issues)
+## Development
 
- License
+The repository's lightweight tests run with:
 
-MIT License - See LICENSE file
+```shell
+python -m unittest discover -s tests -v
+```
 
- Support
+These tests cover request signing and local URL validation. They do not replace
+a live Home Assistant setup or physical inverter test. The analyzer has its own
+tests under `local_analyzer/tests`; see its README.
 
-For issues specific to:
-- Integration: [GitHub Issues](https://github.com/usamakkhan/home-assistant-Cloud-Inverter/issues)
-- Cloud Inverter Device**: Contact your device manufacturer
-
----
-
-Made with ❤️ for solar enthusiasts
+Report reproducible issues through [GitHub Issues](https://github.com/usamakkhan/home-assistant-Cloud-Inverter/issues).
