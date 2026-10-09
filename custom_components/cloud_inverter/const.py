@@ -22,12 +22,14 @@ CONF_TOKEN = "token"
 CONF_SOURCE = "source"
 SOURCE_CLOUD = "cloud"
 SOURCE_LOCAL = "local"
+SOURCE_DIRECT = "direct"
 CONF_URL = "url"
 CONF_HOST = "host"
 CONF_PORT = "port"
 CONF_SCAN_INTERVAL = "scan_interval"
 DEFAULT_LOCAL_HOST = "192.168.50.20"
 DEFAULT_LOCAL_PORT = 8765
+DEFAULT_DIRECT_PORT = 502
 DEFAULT_LOCAL_SCAN_INTERVAL = 180
 
 # Update interval (in seconds)

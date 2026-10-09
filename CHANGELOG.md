@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.3.0 — 2026-10-09
+
+- Add **Direct inverter LAN** as a third Cloud Inverter source. Home
+  Assistant runs the read-only SolarMax PV9000 Modbus capture and sensor
+  mapping itself, without a separate analyzer process.
+- Add separate inverter IP and Modbus/TCP port fields (default 502), plus an
+  editable collection interval (default 180 seconds).
+- Delay captures around heuristic cloud upload windows and document the
+  limits of this precaution. Keep the separate analyzer option for its
+  dashboard and history.
+- Add direct setup instructions and capture tests using sample LAN data.
+
 ## 1.2.0 — 2026-10-09
 
 - Generate fresh CloudInverter.net API signatures for requests and report

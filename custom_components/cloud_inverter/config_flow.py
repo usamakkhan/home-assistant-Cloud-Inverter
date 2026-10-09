@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import logging
+import asyncio
+import ipaddress
 from typing import Any
 
 from aiohttp import ClientError
@@ -23,12 +25,14 @@ from .const import (
     CONF_SOURCE,
     SOURCE_CLOUD,
     SOURCE_LOCAL,
+    SOURCE_DIRECT,
     CONF_URL,
     CONF_HOST,
     CONF_PORT,
     CONF_SCAN_INTERVAL,
     DEFAULT_LOCAL_HOST,
     DEFAULT_LOCAL_PORT,
+    DEFAULT_DIRECT_PORT,
     DEFAULT_LOCAL_SCAN_INTERVAL,
     UPDATE_INTERVAL,
 )
@@ -90,6 +94,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             if user_input[CONF_SOURCE] == SOURCE_LOCAL:
                 return await self.async_step_local()
+            if user_input[CONF_SOURCE] == SOURCE_DIRECT:
+                return await self.async_step_direct()
             return await self.async_step_cloud()
 
         return self.async_show_form(
@@ -97,6 +103,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             data_schema=vol.Schema({
                 vol.Required(CONF_SOURCE, default=SOURCE_LOCAL): vol.In({
                     SOURCE_LOCAL: "Local analyzer (no cloud login)",
+                    SOURCE_DIRECT: "Direct inverter LAN (runs in Home Assistant)",
                     SOURCE_CLOUD: "CloudInverter.net",
                 }),
             }),
@@ -143,6 +150,54 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             data_schema=vol.Schema({
                 vol.Required(CONF_HOST, default=(user_input or {}).get(CONF_HOST, DEFAULT_LOCAL_HOST)): str,
                 vol.Required(CONF_PORT, default=(user_input or {}).get(CONF_PORT, DEFAULT_LOCAL_PORT)):
+                    vol.All(vol.Coerce(int), vol.Range(min=1, max=65535)),
+                vol.Required(
+                    CONF_SCAN_INTERVAL,
+                    default=(user_input or {}).get(CONF_SCAN_INTERVAL, DEFAULT_LOCAL_SCAN_INTERVAL),
+                ): vol.All(vol.Coerce(int), vol.Range(min=10, max=900)),
+            }),
+            errors=errors,
+        )
+
+    async def async_step_direct(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Configure read-only Modbus collection inside Home Assistant."""
+        errors: dict[str, str] = {}
+        if user_input is not None:
+            try:
+                host = str(ipaddress.ip_address(str(user_input[CONF_HOST]).strip()))
+                port = int(user_input[CONF_PORT])
+                if not 1 <= port <= 65535:
+                    raise ValueError("invalid port")
+            except ValueError:
+                errors["base"] = "invalid_direct_host"
+            else:
+                try:
+                    reader, writer = await asyncio.wait_for(
+                        asyncio.open_connection(host, port), timeout=5
+                    )
+                    writer.close()
+                    await writer.wait_closed()
+                except (OSError, TimeoutError):
+                    errors["base"] = "cannot_connect_direct"
+                else:
+                    await self.async_set_unique_id(f"direct:{host}:{port}")
+                    self._abort_if_unique_id_configured()
+                    return self.async_create_entry(
+                        title="Cloud Inverter Direct",
+                        data={
+                            CONF_SOURCE: SOURCE_DIRECT,
+                            CONF_HOST: host,
+                            CONF_PORT: port,
+                            CONF_SCAN_INTERVAL: int(user_input[CONF_SCAN_INTERVAL]),
+                        },
+                    )
+        return self.async_show_form(
+            step_id="direct",
+            data_schema=vol.Schema({
+                vol.Required(CONF_HOST, default=(user_input or {}).get(CONF_HOST, "192.168.50.10")): str,
+                vol.Required(CONF_PORT, default=(user_input or {}).get(CONF_PORT, DEFAULT_DIRECT_PORT)):
                     vol.All(vol.Coerce(int), vol.Range(min=1, max=65535)),
                 vol.Required(
                     CONF_SCAN_INTERVAL,
@@ -313,6 +368,7 @@ class CloudInverterOptionsFlow(config_entries.OptionsFlowWithReload):
     ) -> FlowResult:
         """Show the interval field and reload the entry after a change."""
         local = self.config_entry.data.get(CONF_SOURCE) == SOURCE_LOCAL
+        direct = self.config_entry.data.get(CONF_SOURCE) == SOURCE_DIRECT
         errors: dict[str, str] = {}
         if user_input is not None:
             options = {CONF_SCAN_INTERVAL: int(user_input[CONF_SCAN_INTERVAL])}
@@ -336,10 +392,27 @@ class CloudInverterOptionsFlow(config_entries.OptionsFlowWithReload):
                             options.update({CONF_HOST: host, CONF_PORT: port})
                     except (ClientError, TimeoutError, ValueError):
                         errors["base"] = "cannot_connect_local"
+            elif direct:
+                try:
+                    host = str(ipaddress.ip_address(str(user_input[CONF_HOST]).strip()))
+                    port = int(user_input[CONF_PORT])
+                except ValueError:
+                    errors["base"] = "invalid_direct_host"
+                else:
+                    try:
+                        reader, writer = await asyncio.wait_for(
+                            asyncio.open_connection(host, port), timeout=5
+                        )
+                        writer.close()
+                        await writer.wait_closed()
+                    except (OSError, TimeoutError):
+                        errors["base"] = "cannot_connect_direct"
+                    else:
+                        options.update({CONF_HOST: host, CONF_PORT: port})
             if not errors:
                 return self.async_create_entry(data=options)
 
-        default = DEFAULT_LOCAL_SCAN_INTERVAL if local else UPDATE_INTERVAL
+        default = DEFAULT_LOCAL_SCAN_INTERVAL if (local or direct) else UPDATE_INTERVAL
         current = self.config_entry.options.get(
             CONF_SCAN_INTERVAL,
             self.config_entry.data.get(CONF_SCAN_INTERVAL, default),
@@ -353,8 +426,15 @@ class CloudInverterOptionsFlow(config_entries.OptionsFlowWithReload):
             fields[vol.Required(CONF_PORT, default=(user_input or {}).get(
                 CONF_PORT, self.config_entry.options.get(CONF_PORT, self.config_entry.data.get(CONF_PORT, saved_port))
             ))] = vol.All(vol.Coerce(int), vol.Range(min=1, max=65535))
+        elif direct:
+            fields[vol.Required(CONF_HOST, default=(user_input or {}).get(
+                CONF_HOST, self.config_entry.options.get(CONF_HOST, self.config_entry.data[CONF_HOST])
+            ))] = str
+            fields[vol.Required(CONF_PORT, default=(user_input or {}).get(
+                CONF_PORT, self.config_entry.options.get(CONF_PORT, self.config_entry.data[CONF_PORT])
+            ))] = vol.All(vol.Coerce(int), vol.Range(min=1, max=65535))
         fields[vol.Required(CONF_SCAN_INTERVAL, default=(user_input or {}).get(CONF_SCAN_INTERVAL, current))] = vol.All(
-            vol.Coerce(int), vol.Range(min=10 if local else UPDATE_INTERVAL, max=900)
+            vol.Coerce(int), vol.Range(min=10 if (local or direct) else UPDATE_INTERVAL, max=900)
         )
         return self.async_show_form(
             step_id="init",

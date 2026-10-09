@@ -1,6 +1,6 @@
 # Cloud Inverter for Home Assistant
 
-A Home Assistant sensor integration with two data sources:
+A Home Assistant sensor integration with three data sources:
 
 **New installation?** Follow the [detailed installation guide](INSTALL.md)
 for HACS or manual setup, cloud login, and the complete local analyzer path.
@@ -10,12 +10,20 @@ See the [changelog](CHANGELOG.md) for release changes.
 | --- | --- | --- | --- |
 | CloudInverter.net | The vendor's HTTPS API | CloudInverter username and password | 30 seconds |
 | Local analyzer | The analyzer's cached `/api/ha` endpoint on your LAN | No cloud login | 180 seconds |
+| Direct inverter LAN | Home Assistant reads the SolarMax PV9000 Modbus/TCP bridge itself | No cloud login or separate analyzer | 180 seconds |
 
 Choose a source when adding the integration. The local source requires the
 [SolarMax PV9000 analyzer](local_analyzer/README.md) to run separately on a
 computer that can reach the inverter. Home Assistant reads its cached HTTP
 response; it does not open another Modbus connection. Existing cloud entries
 continue to use the cloud source.
+
+**Direct inverter LAN** runs the read-only PV9000 capture inside Home
+Assistant. Enter the inverter's LAN IP and Modbus/TCP port (default 502).
+The integration spaces captures at 180 seconds by default and avoids
+heuristic cloud upload windows. It requires Home Assistant to reach the
+inverter directly. The separate analyzer remains available if you want its
+dashboard and history.
 
 ## What is included
 
@@ -73,6 +81,9 @@ been implemented. Other device models are not guaranteed to expose all fields.
 
 ## Add a local source
 
+For collection entirely inside Home Assistant, choose **Direct inverter LAN**
+instead and follow the [direct setup steps](INSTALL.md#2b-connect-directly-from-home-assistant).
+
 1. Start the [local analyzer](local_analyzer/README.md#quick-start) on your LAN.
    It starts with inverter collection **off** unless you explicitly enable a
    collector mode. The recommended collection target is 180 seconds in
@@ -123,6 +134,7 @@ before a real capture.
 | Integration not listed | Confirm `/config/custom_components/cloud_inverter/manifest.json` exists, then restart Home Assistant. |
 | Cloud login rejected | Verify credentials and vendor availability. If the website works, report only the sanitized API status/code from logs; remove account IDs, serials, passwords, and tokens. |
 | Local setup cannot connect | From the Home Assistant network, open `http://HOST:PORT/api/config`. Check analyzer process, Host, Port, and firewall. `0.0.0.0` is a bind address, not the Host to enter. |
+| Direct setup cannot connect | Check that Home Assistant can reach the inverter's LAN IP and Modbus/TCP port (usually 502). The separate analyzer HTTP port 8765 does not apply. |
 | Local sensors unavailable | Check `/api/ha` and the analyzer collector mode. Wait for a successful capture; Cooperative quiet windows can extend the first wait. |
 | Cloud uploads stop or datalogger shows red | Restore the analyzer's Original/cloud-only mode, then try Cooperative mode at 180 seconds. Ten-second direct polling disrupted cloud delivery on the reported installation. |
 

@@ -31,6 +31,15 @@
         },
         "title": "Local Analyzer",
         "description": "Run the SolarMax local analyzer on your LAN first. Enter its host and port separately. The default port is 8765; Home Assistant reads cached data without polling the inverter directly."
+      },
+      "direct": {
+        "data": {
+          "host": "Inverter LAN IP",
+          "port": "Inverter Modbus/TCP port",
+          "scan_interval": "Inverter collection interval (seconds)"
+        },
+        "title": "Direct SolarMax PV9000",
+        "description": "Home Assistant reads the inverter directly over your LAN. Use its IP address and Modbus/TCP port (usually 502). The default collection interval is 180 seconds. Ten-second polling can interrupt cloud uploads and turn the datalogger light red; quiet windows are only a precaution."
       }
     },
     "error": {
@@ -41,7 +50,9 @@
       "invalid_url": "Enter the analyzer base URL with http:// or https:// and an explicit port, without /api/ha.",
       "invalid_response": "The URL did not return a SolarMax analyzer configuration.",
       "cannot_connect_local": "Cannot reach the local analyzer. Check its URL, LAN connection, and port 8765.",
-      "invalid_host": "Enter only the analyzer host or IP in Host and a port from 1 to 65535."
+      "invalid_host": "Enter only the analyzer host or IP in Host and a port from 1 to 65535.",
+      "invalid_direct_host": "Enter the inverter's LAN IP address and a valid port.",
+      "cannot_connect_direct": "Home Assistant cannot reach the inverter's Modbus/TCP port. Check the IP, port, and LAN access."
     },
     "abort": {
       "already_configured": "This source is already configured."
@@ -55,14 +66,16 @@
           "host": "Analyzer host or IP",
           "port": "Analyzer port"
         },
-        "description": "Change the analyzer host, port, or Home Assistant refresh interval. Local mode reads the analyzer cache; change inverter collection timing in the analyzer dashboard.",
+        "description": "Change the host, port, or refresh interval. For direct mode, the interval controls inverter collection; for analyzer mode, it controls cache reads.",
         "title": "Refresh interval"
       }
     },
     "error": {
       "invalid_response": "The host and port did not return a SolarMax analyzer configuration.",
       "cannot_connect_local": "Cannot reach the local analyzer. Check its host, port, and LAN connection.",
-      "invalid_host": "Enter only the analyzer host or IP in Host and a port from 1 to 65535."
+      "invalid_host": "Enter only the analyzer host or IP in Host and a port from 1 to 65535.",
+      "invalid_direct_host": "Enter the inverter's LAN IP address and a valid port.",
+      "cannot_connect_direct": "Home Assistant cannot reach the inverter's Modbus/TCP port."
     }
   }
 }

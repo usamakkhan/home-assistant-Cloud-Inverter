@@ -11,6 +11,7 @@ Home Assistant.
 | Source | You need | Default Home Assistant refresh |
 | --- | --- | --- |
 | CloudInverter.net | A working portal account, an inverter associated with it, and internet access from Home Assistant | 30 seconds |
+| Direct inverter LAN | Home Assistant can reach the SolarMax PV9000 Modbus/TCP bridge on your LAN; no separate analyzer process | 180 seconds |
 | Local analyzer | Python 3.11+ on an always-on LAN computer, access to the inverter's Modbus/TCP bridge, and network access from Home Assistant to the analyzer | 180 seconds |
 
 Download the repository with **Code → Download ZIP** on
@@ -85,7 +86,38 @@ log message and API status for an issue. Remove passwords, tokens, account
 IDs, serials, and LAN addresses. Website login and API availability can
 differ.
 
-## 2B. Run the local analyzer
+## 2B. Connect directly from Home Assistant
+
+Use this option when Home Assistant can reach the SolarMax PV9000 inverter's
+LAN bridge and you do not need the separate analyzer dashboard or history.
+
+1. Confirm the inverter's LAN IP and that Home Assistant can reach its
+   Modbus/TCP port. The usual port is **502**; the setup form lets you change
+   it. No HTTP analyzer port is required.
+2. In Home Assistant, open **Settings → Devices & services → Add integration →
+   Cloud Inverter** and choose **Direct inverter LAN**.
+3. Enter the inverter's IP in **Inverter LAN IP**. Use an IP address such as
+   `192.168.50.10`, not a URL or the analyzer's IP.
+4. Leave **Inverter Modbus/TCP port** at **502** unless your bridge uses
+   another port. Leave **Inverter collection interval** at **180 seconds**.
+5. Finish setup. Home Assistant performs a read-only capture and creates the
+   local sensors. The first capture can wait for a cloud quiet window.
+
+The integration performs the read itself inside Home Assistant's executor;
+there is no separate Python command, analyzer server, or open HTTP port.
+Its capture interval is adjustable from **10–900 seconds** in **Options**.
+It avoids heuristic quiet windows around the vendor's five-minute upload
+cycle, so the actual time between captures can exceed the selected interval.
+These windows are a precaution, not a guarantee that the vendor cloud upload
+will succeed. Polling as fast as 10 seconds may stop cloud uploads and turn
+the datalogger light red. Start with 180 seconds.
+
+This direct source uses the PV9000 read-only register profile. Other inverter
+models or firmware may expose fewer values. Do not add the separate local
+analyzer source for the same inverter unless you intentionally want another
+Modbus reader.
+
+## 2C. Run the separate local analyzer
 
 ### Check the host and network
 
@@ -172,7 +204,8 @@ source for the same analyzer: that creates duplicate entities.
 
 ## Optional local Home Assistant methods
 
-The recommended local method is **Cloud Inverter → Local analyzer** above.
+The simplest local method is **Cloud Inverter → Direct inverter LAN** above.
+The separate analyzer is useful when you also want its dashboard and history.
 Two alternatives are included for installations that need them:
 
 - **Standalone connector:** Copy
@@ -202,6 +235,8 @@ directory when replacing application files.
 | Integration is missing | Verify `/config/custom_components/cloud_inverter/manifest.json`, then restart Home Assistant. |
 | Cloud login fails | Confirm account credentials and portal availability; use sanitized logs to report the failing API status. |
 | Local setup cannot connect | Open `http://ANALYZER_IP:PORT/api/config` from the Home Assistant network. Check Host, Port, bind address, process, and firewall. |
+| Direct setup cannot connect | Check the inverter LAN IP and Modbus/TCP port from the Home Assistant network. Direct mode does not use the analyzer HTTP port. |
+| Direct sensors become unavailable | Check Home Assistant logs for a Modbus read error and verify the inverter bridge is reachable; quiet windows can delay updates. |
 | `/api/ha` is HTTP 503 | Wait for a successful analyzer capture; check inverter IP and collector mode. |
 | Local sensors are unavailable or old | Check `/api/ha`, the analyzer dashboard's capture time, and whether its process is still running. |
 | Cloud uploads stop or datalogger turns red | Return to Original/cloud-only mode; use Cooperative collection at a 180-second target when trying again. |

@@ -26,6 +26,8 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN
 from .local_coordinator import SolarMaxCoordinator
+from .direct_coordinator import DirectSolarMaxCoordinator
+from .const import CONF_SOURCE, SOURCE_DIRECT
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -129,7 +131,7 @@ async def async_setup_entry(
     entry: ConfigEntry,
     async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
-    coordinator: SolarMaxCoordinator = entry.runtime_data
+    coordinator: SolarMaxCoordinator | DirectSolarMaxCoordinator = entry.runtime_data
     async_add_entities(SolarMaxSensor(coordinator, entry, description) for description in SENSORS)
 
 
@@ -140,11 +142,12 @@ class SolarMaxSensor(CoordinatorEntity[SolarMaxCoordinator], SensorEntity):
 
     def __init__(
         self,
-        coordinator: SolarMaxCoordinator,
+        coordinator: SolarMaxCoordinator | DirectSolarMaxCoordinator,
         entry: ConfigEntry,
         description: SolarMaxSensorDescription,
     ) -> None:
         super().__init__(coordinator)
+        self.entry = entry
         self.entity_description = description
         self._attr_unique_id = f"{entry.entry_id}_{description.key}"
 
@@ -164,10 +167,17 @@ class SolarMaxSensor(CoordinatorEntity[SolarMaxCoordinator], SensorEntity):
     @property
     def device_info(self) -> DeviceInfo:
         model = self.coordinator.data.get("model") or "PV9000"
-        return DeviceInfo(
-            identifiers={(DOMAIN, f"local:{self.coordinator.base_url}")},
-            name="Cloud Inverter Local",
+        direct = self.entry.data.get(CONF_SOURCE) == SOURCE_DIRECT
+        identity = (
+            f"direct:{self.coordinator.host}:{self.coordinator.port}"
+            if direct else f"local:{self.coordinator.base_url}"
+        )
+        info = DeviceInfo(
+            identifiers={(DOMAIN, identity)},
+            name="Cloud Inverter Direct" if direct else "Cloud Inverter Local",
             manufacturer="SolarMax / Senergy",
             model=model,
-            configuration_url=self.coordinator.base_url,
         )
+        if not direct:
+            info["configuration_url"] = self.coordinator.base_url
+        return info

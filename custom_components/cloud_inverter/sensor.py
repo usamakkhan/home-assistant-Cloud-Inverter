@@ -36,6 +36,7 @@ from .const import (
     CONF_PASSWORD,
     CONF_SOURCE,
     SOURCE_LOCAL,
+    SOURCE_DIRECT,
     CONF_SCAN_INTERVAL,
 )
 
@@ -48,7 +49,7 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up Cloud Inverter sensors."""
-    if entry.data.get(CONF_SOURCE) == SOURCE_LOCAL:
+    if entry.data.get(CONF_SOURCE) in (SOURCE_LOCAL, SOURCE_DIRECT):
         from .local_sensor import async_setup_entry as async_setup_local_sensors
 
         await async_setup_local_sensors(hass, entry, async_add_entities)

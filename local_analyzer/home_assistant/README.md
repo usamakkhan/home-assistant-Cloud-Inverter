@@ -15,18 +15,22 @@ PV9000 Wi-Fi bridge --Modbus/TCP--> local_analyzer/app.py
                                       +-- cached /api/ha --> Home Assistant
 ```
 
-There are three alternatives for Home Assistant:
+There are four alternatives for Home Assistant:
 
-1. **Cloud Inverter integration → Local analyzer**: recommended. It is part of
+1. **Cloud Inverter integration → Direct inverter LAN**: Home Assistant reads
+   the PV9000 bridge itself. No separate analyzer process is needed; see the
+   [direct installation steps](../../INSTALL.md#2b-connect-directly-from-home-assistant).
+2. **Cloud Inverter integration → Local analyzer**: it is part of
    this repository's main Home Assistant integration and asks for Host, Port,
    and Home Assistant cache scan interval. It needs no cloud credentials.
-2. **Standalone SolarMax Local Cloud Connector**: the
+3. **Standalone SolarMax Local Cloud Connector**: the
    `custom_components/solarmax_pv9000` directory in this folder. It asks for
    the analyzer's full base URL and a cache scan interval.
-3. **REST package**: `solarmax_rest_package.yaml` creates a smaller set of
+4. **REST package**: `solarmax_rest_package.yaml` creates a smaller set of
    sensors without a custom integration.
 
-Choose **one** option per analyzer so the same readings do not appear twice.
+Choose **one** option per inverter so the same readings do not appear twice
+or create two local Modbus readers.
 The cloud-login source of the main Cloud Inverter integration is a separate
 choice and does not use this analyzer.
 
