@@ -4,6 +4,7 @@ A Home Assistant sensor integration with two data sources:
 
 **New installation?** Follow the [detailed installation guide](INSTALL.md)
 for HACS or manual setup, cloud login, and the complete local analyzer path.
+See the [changelog](CHANGELOG.md) for release changes.
 
 | Source | Where readings come from | Credentials | Default Home Assistant refresh |
 | --- | --- | --- | --- |
