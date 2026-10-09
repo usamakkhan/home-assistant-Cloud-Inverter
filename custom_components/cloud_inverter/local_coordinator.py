@@ -20,7 +20,10 @@ class SolarMaxCoordinator(DataUpdateCoordinator[dict]):
 
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
         self.base_url = str(entry.data[CONF_URL]).rstrip("/")
-        interval = int(entry.data.get(CONF_SCAN_INTERVAL, DEFAULT_LOCAL_SCAN_INTERVAL))
+        interval = int(entry.options.get(
+            CONF_SCAN_INTERVAL,
+            entry.data.get(CONF_SCAN_INTERVAL, DEFAULT_LOCAL_SCAN_INTERVAL),
+        ))
         super().__init__(
             hass,
             _LOGGER,

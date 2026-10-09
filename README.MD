@@ -12,11 +12,16 @@ This integration now offers two sources during setup:
   [LAN setup steps](local_analyzer/home_assistant/README.md#1-run-the-analyzer-as-a-lan-service),
   then choose **Local analyzer** when adding **Cloud Inverter** in Home Assistant.
   Enter the analyzer base URL, for example `http://192.168.50.20:8765`, and
-  keep the 180-second cache scan default. No CloudInverter login is needed.
+  keep the 180-second cache scan default or enter another value from 10 to 900
+  seconds. No CloudInverter login is needed.
 
 The local option reads the analyzer's cached `/api/ha` feed. It does not make
 another Modbus connection to the inverter. Enter your own LAN addresses; the
 repository uses sample IPs and `ABCDE123456789` in place of a real serial.
+After setup, open the integration's **Configure** or **Options** menu to change
+the Home Assistant refresh interval. The inverter's actual collection target
+is a separate setting in the analyzer dashboard's collection controls (180
+seconds by default). Cooperative cloud quiet windows can extend that target.
 The standalone local connector under `local_analyzer/home_assistant` remains
 available for manual installation; install one connector per analyzer to avoid
 duplicate entities.

@@ -8,7 +8,8 @@ from aiohttp import ClientError
 import voluptuous as vol
 
 from homeassistant import config_entries
-from homeassistant.core import HomeAssistant
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
@@ -26,6 +27,7 @@ from .const import (
     CONF_SCAN_INTERVAL,
     DEFAULT_LOCAL_URL,
     DEFAULT_LOCAL_SCAN_INTERVAL,
+    UPDATE_INTERVAL,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -64,6 +66,12 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Cloud Inverter."""
 
     VERSION = 1
+
+    @staticmethod
+    @callback
+    def async_get_options_flow(config_entry: ConfigEntry) -> config_entries.OptionsFlow:
+        """Let users adjust the refresh interval after setup."""
+        return CloudInverterOptionsFlow()
 
     def __init__(self):
         """Initialize the config flow."""
@@ -286,3 +294,31 @@ class InvalidAuth(HomeAssistantError):
 
 class NoInvertersFound(HomeAssistantError):
     """Error to indicate no inverters were found."""
+
+
+class CloudInverterOptionsFlow(config_entries.OptionsFlowWithReload):
+    """Options for the Home Assistant refresh interval."""
+
+    async def async_step_init(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Show the interval field and reload the entry after a change."""
+        if user_input is not None:
+            return self.async_create_entry(data={
+                CONF_SCAN_INTERVAL: int(user_input[CONF_SCAN_INTERVAL]),
+            })
+
+        local = self.config_entry.data.get(CONF_SOURCE) == SOURCE_LOCAL
+        default = DEFAULT_LOCAL_SCAN_INTERVAL if local else UPDATE_INTERVAL
+        current = self.config_entry.options.get(
+            CONF_SCAN_INTERVAL,
+            self.config_entry.data.get(CONF_SCAN_INTERVAL, default),
+        )
+        return self.async_show_form(
+            step_id="init",
+            data_schema=vol.Schema({
+                vol.Required(CONF_SCAN_INTERVAL, default=current): vol.All(
+                    vol.Coerce(int), vol.Range(min=10 if local else UPDATE_INTERVAL, max=900)
+                ),
+            }),
+        )

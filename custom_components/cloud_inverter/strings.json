@@ -26,7 +26,7 @@
       "local": {
         "data": {
           "url": "Analyzer URL",
-          "scan_interval": "Cache scan interval (seconds)"
+          "scan_interval": "Home Assistant cache scan (seconds)"
         },
         "title": "Local Analyzer",
         "description": "Run the SolarMax local analyzer on your LAN first. Enter its base URL, for example http://192.168.50.20:8765. Home Assistant reads its cached data; it does not poll the inverter directly."
@@ -43,6 +43,17 @@
     },
     "abort": {
       "already_configured": "This source is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "scan_interval": "Refresh interval (seconds)"
+        },
+        "description": "Change how often Home Assistant refreshes these sensors. Local mode reads the analyzer cache; change the inverter collection interval in the analyzer dashboard.",
+        "title": "Refresh interval"
+      }
     }
   }
 }

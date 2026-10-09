@@ -67,7 +67,10 @@ then open **Settings → Devices & services → Add integration**. Search for
 `http://ANALYZER_LAN_IP:8765` with the default 180-second cache scan interval.
 No CloudInverter.net username or password is required. The URL is the analyzer
 base URL; do not append `/api/ha`. After setup, check the new device's sensors
-after the first successful analyzer capture.
+after the first successful analyzer capture. You can change the Home Assistant
+cache scan interval later under the integration's **Configure/Options** menu.
+To change the inverter collection target, use the analyzer dashboard's
+collection controls; its preset is 180 seconds.
 
 ## 3. Standalone connector (alternative)
 

@@ -36,6 +36,7 @@ from .const import (
     CONF_PASSWORD,
     CONF_SOURCE,
     SOURCE_LOCAL,
+    CONF_SCAN_INTERVAL,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -65,7 +66,9 @@ async def async_setup_entry(
         _LOGGER.info("Using selected inverter")
     
     # Create coordinator
-    coordinator = CloudInverterDataUpdateCoordinator(hass, api)
+    coordinator = CloudInverterDataUpdateCoordinator(
+        hass, api, int(entry.options.get(CONF_SCAN_INTERVAL, UPDATE_INTERVAL))
+    )
     await coordinator.async_config_entry_first_refresh()
     
     # Create all sensors
@@ -171,13 +174,13 @@ async def async_setup_entry(
 class CloudInverterDataUpdateCoordinator(DataUpdateCoordinator):
     """Class to manage fetching Cloud Inverter data."""
 
-    def __init__(self, hass: HomeAssistant, api: CloudInverterAPI) -> None:
+    def __init__(self, hass: HomeAssistant, api: CloudInverterAPI, interval_seconds: int) -> None:
         """Initialize coordinator."""
         super().__init__(
             hass,
             _LOGGER,
             name=DOMAIN,
-            update_interval=timedelta(seconds=UPDATE_INTERVAL),
+            update_interval=timedelta(seconds=max(30, interval_seconds)),
         )
         self.api = api
 
