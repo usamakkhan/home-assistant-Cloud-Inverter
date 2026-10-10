@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.5.10 — Solar Touch — 2026-10-10
+
+- Added optional **Last local value change** and **Last cloud value change** diagnostic sensors. They show when reported readings last changed in Home Assistant, not the inverter's actual sampling time. They are disabled by default and can be enabled on the device page.
+- Added privacy-safe diagnostics for both data sources: refresh interval, collection success, repeated reading count, and timestamps. The download excludes account credentials, inverter IDs, addresses, and raw telemetry.
+- Fixed cloud collection for accounts with multiple inverters so each configured entry requests its selected inverter ID.
+- Reduced routine successful cloud retrieval logging to debug level.
+- Documented how to distinguish repeated cloud uploads from failed collection.
+
 ## v1.5.9 — Solar Touch — 2026-10-09
 
 - Simplified the current documentation to state the AGPL-3.0-only license and

@@ -17,6 +17,7 @@ from .const import (
 )
 from .direct_profile.ha import seconds_until_safe_window, snapshot_payload
 from .direct_profile.profile import read_profile_snapshot
+from .health import TelemetryHealth
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -35,6 +36,7 @@ class DirectSolarMaxCoordinator(DataUpdateCoordinator[dict]):
         ))
         self._metadata_cache: dict = {}
         self._capture_lock = asyncio.Lock()
+        self.health = TelemetryHealth()
         super().__init__(
             hass,
             _LOGGER,
@@ -59,6 +61,8 @@ class DirectSolarMaxCoordinator(DataUpdateCoordinator[dict]):
                     300.0,
                     self.port,
                 )
-                return snapshot_payload(snapshot)
+                payload = snapshot_payload(snapshot)
+                self.health.observe(payload["sensors"])
+                return payload
             except (OSError, ValueError, RuntimeError) as exc:
                 raise UpdateFailed(f"SolarMax direct read failed: {exc}") from exc

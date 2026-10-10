@@ -1,5 +1,7 @@
 # ☀️ Solar Touch installation guide
 
+After setup, optional **Last local value change** and **Last cloud value change** diagnostic entities can be enabled on the Solar Touch device page. They show when Home Assistant last observed changed measurements. A constant reading alone is not proof of failed collection. Download diagnostics from the integration menu for poll counts and timestamps; the report omits credentials, serials, addresses, and raw readings.
+
 This guide installs the Solar Touch integration in Home Assistant and connects it through either **Get Data Locally using Inverter IP** or **CloudInverter.net**. Local collection runs inside Home Assistant.
 
 ## Before you start

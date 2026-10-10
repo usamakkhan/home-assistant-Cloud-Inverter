@@ -290,7 +290,7 @@ class CloudInverterAPI:
                         try:
                             data = await response.json() if response_text else {}
                             if data and len(data) > 5:  # Should have multiple keys
-                                _LOGGER.info("Successfully retrieved inverter data with %d fields", len(data))
+                                _LOGGER.debug("Successfully retrieved inverter data with %d fields", len(data))
                                 return data
                             else:
                                 _LOGGER.warning("Received minimal inverter data (%d fields)", len(data) if data else 0)

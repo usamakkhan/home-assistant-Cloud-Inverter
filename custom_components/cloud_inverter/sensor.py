@@ -23,6 +23,7 @@ from homeassistant.const import (
     UnitOfTemperature,
 )
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers import entity_registry as er
@@ -35,6 +36,7 @@ from homeassistant.helpers.update_coordinator import (
 from .api import CloudInverterAPI
 from .cloud_identity import cloud_sensor_unique_id, migrate_legacy_sensor_ids
 from .numeric import numeric_state, split_grid_power
+from .health import TelemetryHealth
 from .const import (
     DOMAIN,
     UPDATE_INTERVAL,
@@ -193,6 +195,7 @@ async def async_setup_entry(
         CloudInverterSensor(coordinator, "modelName", "Model", None, None, None),
         CloudInverterSensor(coordinator, "GoodsID", "Serial Number", None, None, None),
         CloudInverterSensor(coordinator, "FirmwareVersion", "Firmware Version", None, None, None),
+        CloudInverterSensor(coordinator, "_last_value_change", "Last cloud value change", None, SensorDeviceClass.TIMESTAMP, None, diagnostic=True),
     ])
     
     async_add_entities(sensors)
@@ -213,11 +216,12 @@ class CloudInverterDataUpdateCoordinator(DataUpdateCoordinator):
         self.api = api
         self.entry_id = entry_id
         self.goods_id = goods_id
+        self.health = TelemetryHealth()
 
     async def _async_update_data(self) -> dict[str, Any]:
         """Fetch data from API."""
         try:
-            data = await self.api.get_inverter_data()
+            data = await self.api.get_inverter_data(self.goods_id)
             
             if not data:
                 _LOGGER.warning("No data returned from API")
@@ -274,7 +278,18 @@ class CloudInverterDataUpdateCoordinator(DataUpdateCoordinator):
                 except (ValueError, TypeError):
                     pass
             
-            _LOGGER.debug("Inverter update contains %d fields", len(flattened_data))
+            # Compare physical readings, not portal metadata or request timestamps.
+            tracked_keys = (
+                "Pac", "gridCurrpac", "toPbat", "fromPbat", "SOC",
+                "ETotal", "EFTotal", "ETTotal", "Pdc_0", "Pdc_1",
+            )
+            measurements = {
+                key: flattened_data[key] for key in tracked_keys if key in flattened_data
+            }
+            flattened_data["_last_value_change"] = self.health.observe(
+                measurements or flattened_data
+            )
+            _LOGGER.debug("Inverter update contains %d fields", len(flattened_data) - 1)
             return flattened_data
             
         except UpdateFailed:
@@ -295,6 +310,7 @@ class CloudInverterSensor(CoordinatorEntity, SensorEntity):
         unit: str | None,
         device_class: SensorDeviceClass | None,
         state_class: SensorStateClass | None,
+        diagnostic: bool = False,
     ) -> None:
         """Initialize the sensor."""
         super().__init__(coordinator)
@@ -304,6 +320,9 @@ class CloudInverterSensor(CoordinatorEntity, SensorEntity):
         self._attr_native_unit_of_measurement = unit
         self._attr_device_class = device_class
         self._attr_state_class = state_class
+        if diagnostic:
+            self._attr_entity_category = EntityCategory.DIAGNOSTIC
+            self._attr_entity_registry_enabled_default = False
 
     @property
     def native_value(self):
@@ -312,6 +331,9 @@ class CloudInverterSensor(CoordinatorEntity, SensorEntity):
             return None
         
         value = self.coordinator.data.get(self._data_key)
+
+        if self._attr_device_class == SensorDeviceClass.TIMESTAMP:
+            return value
         
         # Handle None or empty string values
         if value is None or value == "" or value == "-":

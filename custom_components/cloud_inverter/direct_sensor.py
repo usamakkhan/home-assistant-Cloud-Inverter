@@ -20,7 +20,7 @@ from homeassistant.const import (
     UnitOfTime,
 )
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity import DeviceInfo
+from homeassistant.helpers.entity import DeviceInfo, EntityCategory
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
@@ -132,6 +132,14 @@ SENSORS = (
     measurement("load_current", "Normal Load current", UnitOfElectricCurrent.AMPERE, SensorDeviceClass.CURRENT),
     energy("load_energy_today", "Normal Load energy today"),
     energy("load_energy_total", "Normal Load energy total"),
+    SolarMaxSensorDescription(
+        key="last_value_change",
+        source_key="last_value_change",
+        name="Last local value change",
+        device_class=SensorDeviceClass.TIMESTAMP,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+    ),
 )
 
 
@@ -162,6 +170,8 @@ class SolarMaxSensor(CoordinatorEntity[DirectSolarMaxCoordinator], SensorEntity)
 
     @property
     def native_value(self):
+        if self.entity_description.key == "last_value_change":
+            return self.coordinator.health.last_value_change
         sensor = self.coordinator.data.get("sensors", {}).get(self.entity_description.source_key)
         if sensor is None:
             return None
@@ -179,6 +189,8 @@ class SolarMaxSensor(CoordinatorEntity[DirectSolarMaxCoordinator], SensorEntity)
 
     @property
     def available(self) -> bool:
+        if self.entity_description.key == "last_value_change":
+            return super().available and self.native_value is not None
         return (
             super().available
             and bool(self.coordinator.data.get("available"))

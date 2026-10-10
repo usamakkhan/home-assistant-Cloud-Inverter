@@ -169,6 +169,13 @@ Removing an old entry may remove its Home Assistant entities. Review dashboards 
 
 ## 🔧 Troubleshooting
 
+### Check whether readings are changing
+
+- Open the Solar Touch device in Home Assistant. If needed, enable **Last local value change** or **Last cloud value change** from its disabled entities. These diagnostic sensors show the last time Home Assistant saw a monitored reading change. A stable value can be normal at night or under steady load; it does not by itself prove a connection fault.
+- On the integration's three-dot menu, download diagnostics to check the configured interval, last successful poll, and number of repeated snapshots. The report contains operational counts and timestamps only; it omits credentials, serials, LAN addresses, and measured values.
+- CloudInverter.net may repeat the same inverter upload for about five minutes on my installation. The change sensor does not claim to be the vendor's sampling timestamp. The local mode observes changes in the inverter's Modbus measurements directly.
+- If collection has failed, check the device's unavailable entities and the integration logs. Repeated values with successful polls point to a different issue than a failed connection.
+
 | Symptom | Check |
 | --- | --- |
 | **Solar Touch** is missing after installation | Verify `/config/custom_components/cloud_inverter/manifest.json` exists, remove any extra directory nesting, and restart Home Assistant. |
