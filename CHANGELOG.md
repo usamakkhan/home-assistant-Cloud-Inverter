@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.5.11 — Solar Touch — 2026-10-10
+
+- Fixed a Home Assistant log warning found during live diagnosis: the cloud setup and configuration flow no longer close HTTP sessions owned by Home Assistant when an entry reloads or a setup flow ends.
+
 ## v1.5.10 — Solar Touch — 2026-10-10
 
 - Added optional **Last local value change** and **Last cloud value change** diagnostic sensors. They show when reported readings last changed in Home Assistant, not the inverter's actual sampling time. They are disabled by default and can be enabled on the device page.

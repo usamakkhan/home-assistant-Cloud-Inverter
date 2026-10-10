@@ -51,7 +51,7 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
         data[CONF_USERNAME],
         data[CONF_PASSWORD],
         async_create_clientsession(hass, cookie_jar=aiohttp.DummyCookieJar()),
-        close_session=True,
+        close_session=False,  # Home Assistant owns async_create_clientsession.
     )
     
     try:

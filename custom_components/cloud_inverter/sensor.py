@@ -70,7 +70,7 @@ async def async_setup_entry(
         username,
         password,
         async_create_clientsession(hass, cookie_jar=aiohttp.DummyCookieJar()),
-        close_session=True,
+        close_session=False,  # Home Assistant owns async_create_clientsession.
     )
     
     # Set the goods_id directly if provided
