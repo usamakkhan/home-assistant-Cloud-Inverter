@@ -27,7 +27,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from .const import DOMAIN
 from .direct_coordinator import DirectSolarMaxCoordinator
 from .direct_config import direct_unique_id
-from .numeric import split_direct_battery_power
+from .numeric import combine_total_energy, split_direct_battery_power, split_grid_power
 from .const import (
     CONF_HOST, CONF_PORT, CONF_UNIT_ID, DEFAULT_DIRECT_UNIT_ID,
 )
@@ -38,6 +38,7 @@ class SolarMaxSensorDescription(SensorEntityDescription):
     source_key: str
     value_field: str = "value"
     battery_direction: str | None = None
+    grid_direction: str | None = None
 
 
 def power(key: str, name: str) -> SolarMaxSensorDescription:
@@ -94,6 +95,8 @@ SENSORS = (
     SolarMaxSensorDescription(key="inverter_mode", source_key="inverter_mode", name="Inverter mode", value_field="label"),
     measurement("temperature", "Inverter temperature", UnitOfTemperature.CELSIUS, SensorDeviceClass.TEMPERATURE),
     power("grid_power", "Grid power"),
+    SolarMaxSensorDescription(key="grid_import_power", source_key="grid_power", name="Instantaneous Power Import", grid_direction="import", native_unit_of_measurement=UnitOfPower.WATT, device_class=SensorDeviceClass.POWER, state_class=SensorStateClass.MEASUREMENT),
+    SolarMaxSensorDescription(key="grid_export_power", source_key="grid_power", name="Instantaneous Power Export", grid_direction="export", native_unit_of_measurement=UnitOfPower.WATT, device_class=SensorDeviceClass.POWER, state_class=SensorStateClass.MEASUREMENT),
     measurement("grid_voltage", "Grid voltage", UnitOfElectricPotential.VOLT, SensorDeviceClass.VOLTAGE),
     measurement("grid_current", "Grid current", UnitOfElectricCurrent.AMPERE, SensorDeviceClass.CURRENT),
     measurement("grid_frequency", "Grid frequency", UnitOfFrequency.HERTZ, SensorDeviceClass.FREQUENCY),
@@ -163,9 +166,15 @@ class SolarMaxSensor(CoordinatorEntity[DirectSolarMaxCoordinator], SensorEntity)
         if sensor is None:
             return None
         value = sensor.get(self.entity_description.value_field)
+        if self.entity_description.key == "total_energy":
+            remainder = self.coordinator.data.get("sensors", {}).get("total_energy_wh_remainder", {}).get("value")
+            return combine_total_energy(value, remainder)
         if self.entity_description.battery_direction:
             charging, discharging = split_direct_battery_power(value)
             return charging if self.entity_description.battery_direction == "charging" else discharging
+        if self.entity_description.grid_direction:
+            import_power, export_power = split_grid_power(value)
+            return import_power if self.entity_description.grid_direction == "import" else export_power
         return value
 
     @property
@@ -174,6 +183,7 @@ class SolarMaxSensor(CoordinatorEntity[DirectSolarMaxCoordinator], SensorEntity)
             super().available
             and bool(self.coordinator.data.get("available"))
             and self.entity_description.source_key in self.coordinator.data.get("sensors", {})
+            and self.native_value is not None
         )
 
     @property

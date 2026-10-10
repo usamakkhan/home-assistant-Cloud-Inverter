@@ -30,3 +30,14 @@ def split_direct_battery_power(value: object) -> tuple[float | None, float | Non
     if power is None:
         return None, None
     return max(-power, 0.0), max(power, 0.0)
+
+
+def combine_total_energy(whole_kwh: object, remainder_wh: object) -> float | None:
+    """Add a valid Wh remainder to the inverter's whole-kWh lifetime counter."""
+    total = numeric_state(whole_kwh)
+    if total is None:
+        return None
+    remainder = numeric_state(remainder_wh)
+    if remainder is None or not 0 <= remainder < 1000 or remainder != int(remainder):
+        return total
+    return round(total + remainder / 1000, 3)

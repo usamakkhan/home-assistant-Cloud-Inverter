@@ -40,3 +40,9 @@ class NumericStateTests(unittest.TestCase):
         ):
             with self.subTest(reading=reading):
                 self.assertEqual(numeric.split_direct_battery_power(reading), expected)
+
+    def test_direct_lifetime_energy_uses_wh_remainder_when_valid(self):
+        self.assertEqual(numeric.combine_total_energy(25150, 375), 25150.375)
+        self.assertEqual(numeric.combine_total_energy(25150, None), 25150)
+        self.assertEqual(numeric.combine_total_energy(25150, 1000), 25150)
+        self.assertIsNone(numeric.combine_total_energy(None, 375))

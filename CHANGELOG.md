@@ -1,5 +1,20 @@
 # Changelog
 
+## v1.5.7 — Solar Touch — 2026-10-09
+
+- Use the direct inverter's Wh remainder with its whole-kWh lifetime solar
+  counter, giving the Energy dashboard 0.001 kWh resolution where supported.
+  Invalid or absent remainders leave the existing whole-kWh reading intact.
+- Add direct LAN instantaneous grid import and export power sensors from the
+  signed grid reading, matching the cloud source's live power sensors.
+- Reject a second cloud entry for the same inverter identifier even when it is
+  reached through a different portal account. Existing duplicate entries are
+  left for the user to review so saved entity IDs and statistics are preserved.
+- Mark a direct sensor unavailable when its decoded value is missing or invalid.
+- Document the Energy setup pattern used by other Home Assistant inverter
+  integrations: one lifetime energy counter per physical flow, with power
+  sensors used only for live readings.
+
 ## v1.5.6 — Solar Touch — 2026-10-09
 
 - Change the license for this release to GNU AGPL v3.0 (`AGPL-3.0-only`),

@@ -62,11 +62,19 @@ Depending on the source and inverter, readings can cover:
 - **Grid:** signed Grid Power plus separate **Instantaneous Power Import** and
   **Instantaneous Power Export** sensors, voltage, current, and energy counters
   when provided. Positive Grid Power is import; negative Grid Power is export.
+  In direct LAN mode, these live grid power sensors use the documented L1
+  register, so confirm the meter topology before treating them as a whole-home
+  value on a multiphase installation.
 - **Battery:** state of charge, instantaneous charging/discharging power, voltage/current, and energy when reported. Direct LAN battery power is signed (negative means charging); the separate direction sensors are nonnegative watts.
 - **Loads and outputs:** available household, backup, and generator-side measurements.
 - **Device health:** operating mode, temperatures, status, and selected device metadata.
 
 Cloud and direct LAN paths have different field sets. A missing register or portal field is not treated as zero. Home Assistant assigns entity IDs when it creates entities, so check your device page for the actual names. The app does **not** invent readings before a successful capture.
+
+The direct LAN lifetime solar energy sensor combines whole kWh with the
+inverter's Wh remainder when the latter is valid. The same lifetime entity ID
+is retained. This improves the resolution of new readings; it does not rewrite
+previously recorded Home Assistant statistics.
 
 ### ⚡ Add CloudInverter.net sensors to the Energy dashboard
 
@@ -85,6 +93,12 @@ Open **Settings → Dashboards → Energy** and use the following cumulative **k
 If one of these sensors is missing from a selector, open **Settings → Developer Tools → States** and find its actual entity ID. Check that it has a numeric state, `device_class: energy`, `state_class: total_increasing`, and `unit_of_measurement: kWh`. These are set by the integration for the cloud total sensors. Then check **Settings → Developer Tools → Statistics** for errors affecting that entity, and confirm the Recorder integration is recording it. Home Assistant's [Energy FAQ](https://www.home-assistant.io/docs/energy/faq/) explains the selector requirements, and its [long-term statistics guide](https://www.home-assistant.io/docs/configuration/long-term-statistics/) explains how cumulative changes are counted. If it still does not appear, report the exact Energy field, entity ID, and sanitized attributes; hide serial numbers and account details.
 
 Home Assistant controls the Energy dashboard's suggested choices and saved configuration. The integration exposes eligible sensors, but you select each sensor in the matching Energy field.
+
+Choose **one entry per physical inverter** for each Energy flow. Adding cloud
+and direct readings from the same device, or adding both **Daily Energy** and
+**Total Energy** for the same solar production, counts that flow twice. New
+cloud setup attempts for an inverter already configured through another cloud
+account are rejected; older duplicate entries are not removed automatically.
 
 **Instantaneous Solar Production**, **Instantaneous Power Import**, and
 **Instantaneous Power Export**, **Instantaneous Battery Charging Power**, and

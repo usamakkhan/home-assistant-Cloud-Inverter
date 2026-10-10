@@ -20,6 +20,7 @@ from .const import (
     DOMAIN,
     CONF_USERNAME,
     CONF_PASSWORD,
+    CONF_GOODS_ID,
     CONF_SOURCE,
     SOURCE_CLOUD,
     SOURCE_DIRECT,
@@ -300,13 +301,22 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if not selected_inverter:
             selected_inverter = {"model": "Unknown", "name": goods_id}
         
-        # Check if already configured
-        await self.async_set_unique_id(f"{self.username}_{goods_id}")
-        self._abort_if_unique_id_configured()
-        
-        # Clean up API
-        if self.api:
-            await self.api.close()
+        # The same hardware may be shared with more than one portal account.
+        # Username-scoped unique IDs alone would create duplicate HA entities.
+        try:
+            if any(
+                entry.data.get(CONF_SOURCE, SOURCE_CLOUD) == SOURCE_CLOUD
+                and entry.data.get(CONF_GOODS_ID) is not None
+                and str(entry.data[CONF_GOODS_ID]) == str(goods_id)
+                for entry in self._async_current_entries()
+            ):
+                return self.async_abort(reason="already_configured")
+            await self.async_set_unique_id(f"{self.username}_{goods_id}")
+            self._abort_if_unique_id_configured()
+        finally:
+            if self.api:
+                await self.api.close()
+                self.api = None
         
         title = f"Solar Touch ({selected_inverter['model']})"
         
