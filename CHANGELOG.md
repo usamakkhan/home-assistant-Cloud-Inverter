@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.5.6 — Solar Touch — 2026-10-09
+
+- Change the license for this release to GNU AGPL v3.0 (`AGPL-3.0-only`),
+  following the maintainer's authorization. The full standard license text is
+  included in `LICENSE` and the README now describes redistribution and sale
+  under its terms. Earlier releases retain the license terms under which they
+  were distributed.
+- Replace the obsolete PolyForm Strict badge and the note about its HACS
+  license-identification failure. CI validation must still run before its
+  result can be reported as passing.
+
 ## v1.5.5 — Solar Touch — 2026-10-09
 
 - Add separate instantaneous battery charging and discharging power sensors for

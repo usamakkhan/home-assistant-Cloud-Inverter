@@ -4,7 +4,7 @@
 
 <p align="center">
   <a href="https://github.com/usamakkhan/home-assistant-Solar-Touch/releases"><img alt="Release" src="https://img.shields.io/github/v/release/usamakkhan/home-assistant-Solar-Touch?color=blue"></a>
-  <a href="https://github.com/usamakkhan/home-assistant-Solar-Touch/blob/main/LICENSE"><img alt="PolyForm Strict license" src="https://img.shields.io/badge/license-PolyForm%20Strict-orange"></a>
+  <a href="https://github.com/usamakkhan/home-assistant-Solar-Touch/blob/main/LICENSE"><img alt="AGPL-3.0 license" src="https://img.shields.io/badge/license-AGPL--3.0-blue"></a>
   <a href="https://github.com/usamakkhan/home-assistant-Solar-Touch/actions"><img alt="Validation" src="https://img.shields.io/github/actions/workflow/status/usamakkhan/home-assistant-Solar-Touch/hacs-validation.yml?branch=main&label=validation"></a>
 </p>
 
@@ -21,10 +21,7 @@ existing entity ID may still start with `sensor.cloud_inverter_` after the
 display name changes to Solar Touch.
 
 > [!NOTE]
-> **Current release license:** [PolyForm Strict License 1.0.0](https://github.com/usamakkhan/home-assistant-Solar-Touch/blob/main/LICENSE). It permits noncommercial use but does not grant permission to redistribute the integration, sell copies, or publish modified versions. Copyright © 2026 Usama Khan. Earlier copies released under MIT retain their original license terms.
-
-> [!IMPORTANT]
-> GitHub currently reports PolyForm Strict as an unidentified license (`NOASSERTION`), so this repository's **HACS validation action fails its license check**. The code tests pass. If HACS does not offer this version, use the [manual installation steps](https://github.com/usamakkhan/home-assistant-Solar-Touch/blob/main/INSTALL.md#manual). The project will not label this release as MIT to make validation pass because that would grant rights the maintainer has not offered.
+> **Current release license:** [GNU Affero General Public License v3.0](https://github.com/usamakkhan/home-assistant-Solar-Touch/blob/main/LICENSE) (`AGPL-3.0-only`). Copyright © 2026 Usama Khan. The license permits use, modification, redistribution, and sale under its conditions, including source availability and preservation of notices. Earlier copies released under MIT or PolyForm Strict retain their original license terms; this change does not retroactively alter those copies.
 
 > [!IMPORTANT]
 > On the installation reported by the project owner, the **inverter uploads data to CloudInverter.net about every five minutes**. A Home Assistant cloud refresh can happen more often, but it may receive the **same uploaded reading** until the inverter sends its next update. The integration does not control the inverter's upload schedule.
@@ -182,4 +179,4 @@ Remove or redact passwords, tokens, account IDs, serials, MAC addresses, and pri
 
 - Run the integration tests with `python -m unittest discover -s tests -v`. They cover signing, URL validation, direct Modbus checks, capture behavior, and freshness logic; they do not replace a real inverter and Home Assistant test.
 - Review release changes in the [changelog](https://github.com/usamakkhan/home-assistant-Solar-Touch/blob/main/CHANGELOG.md) and report reproducible problems through [GitHub Issues](https://github.com/usamakkhan/home-assistant-Solar-Touch/issues), using sanitized details.
-- The current release uses the [PolyForm Strict License 1.0.0](https://github.com/usamakkhan/home-assistant-Solar-Touch/blob/main/LICENSE). For redistribution or commercial licensing, contact the copyright holder. Bundled integration icons live in [`brand/`](https://github.com/usamakkhan/home-assistant-Solar-Touch/tree/main/custom_components/cloud_inverter/brand); [Home Assistant's brand image guidance](https://developers.home-assistant.io/docs/core/integration/brand_images/) explains how Home Assistant displays integration assets.
+- The current release uses [AGPL-3.0-only](https://github.com/usamakkhan/home-assistant-Solar-Touch/blob/main/LICENSE). Redistributed copies and modified versions must meet its terms, including notices and corresponding source. Bundled integration icons live in [`brand/`](https://github.com/usamakkhan/home-assistant-Solar-Touch/tree/main/custom_components/cloud_inverter/brand); [Home Assistant's brand image guidance](https://developers.home-assistant.io/docs/core/integration/brand_images/) explains how Home Assistant displays integration assets.
