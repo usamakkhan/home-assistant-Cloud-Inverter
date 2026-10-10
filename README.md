@@ -65,7 +65,7 @@ Depending on the source and inverter, readings can cover:
 - **Grid:** signed Grid Power plus separate **Instantaneous Power Import** and
   **Instantaneous Power Export** sensors, voltage, current, and energy counters
   when provided. Positive Grid Power is import; negative Grid Power is export.
-- **Battery:** state of charge, charge/discharge power, voltage/current, and energy when reported.
+- **Battery:** state of charge, instantaneous charging/discharging power, voltage/current, and energy when reported. Direct LAN battery power is signed (negative means charging); the separate direction sensors are nonnegative watts.
 - **Loads and outputs:** available household, backup, and generator-side measurements.
 - **Device health:** operating mode, temperatures, status, and selected device metadata.
 
@@ -90,10 +90,21 @@ If one of these sensors is missing from a selector, open **Settings → Develope
 Home Assistant controls the Energy dashboard's suggested choices and saved configuration. The integration exposes eligible sensors, but you select each sensor in the matching Energy field.
 
 **Instantaneous Solar Production**, **Instantaneous Power Import**, and
-**Instantaneous Power Export** are power sensors in W for live dashboards. The
+**Instantaneous Power Export**, **Instantaneous Battery Charging Power**, and
+**Instantaneous Battery Discharging Power** are power sensors in W for live dashboards. The
 Energy dashboard's production and consumption totals require the cumulative
 kWh sensors in the table above. An unavailable signed Grid Power reading leaves
 both derived power sensors unavailable; it is not interpreted as zero.
+
+All instantaneous power sensors use `device_class: power` and `state_class:
+measurement`. Battery SOC uses `device_class: battery`, `state_class:
+measurement`, and `%`. Energy counters use `device_class: energy` and
+`state_class: total_increasing`. These classes let Home Assistant build
+long-term statistics and offer the cumulative counters in Energy selectors.
+If you disabled a direct LAN entry, remove its old solar source from **Settings
+→ Dashboards → Energy** and choose the active cloud **Total Energy** sensor
+instead. A saved Energy source pointing to the disabled direct entity will
+remain undefined even when the cloud sensors are healthy.
 
 ## 🚀 Install in Home Assistant
 

@@ -1,5 +1,19 @@
 # Changelog
 
+## v1.5.5 — Solar Touch — 2026-10-09
+
+- Add separate instantaneous battery charging and discharging power sensors for
+  direct inverter LAN, splitting the signed local battery reading (negative is
+  charging). Missing or invalid readings remain unavailable.
+- Label existing cloud battery power sensors as instantaneous without changing
+  their unique IDs. Label direct solar power and signed battery power likewise.
+- Keep power readings in W with `device_class: power` and `state_class:
+  measurement`; battery state of charge in `%` with `device_class: battery` and
+  `state_class: measurement`; and cumulative energy counters in kWh or Wh with
+  `device_class: energy` and `state_class: total_increasing`.
+- Clarify Energy dashboard setup when a disabled direct entry leaves a stale
+  solar source reference. The license remains PolyForm Strict.
+
 ## v1.5.4 — Solar Touch — 2026-10-09
 
 This release consolidates the changes made since [Cloud Inverter

@@ -30,3 +30,13 @@ class NumericStateTests(unittest.TestCase):
         ):
             with self.subTest(reading=reading):
                 self.assertEqual(numeric.split_grid_power(reading), expected)
+
+    def test_direct_battery_power_splits_into_charge_and_discharge(self):
+        for reading, expected in (
+            (-257, (257.0, 0.0)),
+            (640, (0.0, 640.0)),
+            (0, (0.0, 0.0)),
+            ("offline", (None, None)),
+        ):
+            with self.subTest(reading=reading):
+                self.assertEqual(numeric.split_direct_battery_power(reading), expected)

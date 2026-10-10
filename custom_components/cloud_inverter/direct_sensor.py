@@ -27,6 +27,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from .const import DOMAIN
 from .direct_coordinator import DirectSolarMaxCoordinator
 from .direct_config import direct_unique_id
+from .numeric import split_direct_battery_power
 from .const import (
     CONF_HOST, CONF_PORT, CONF_UNIT_ID, DEFAULT_DIRECT_UNIT_ID,
 )
@@ -36,6 +37,7 @@ from .const import (
 class SolarMaxSensorDescription(SensorEntityDescription):
     source_key: str
     value_field: str = "value"
+    battery_direction: str | None = None
 
 
 def power(key: str, name: str) -> SolarMaxSensorDescription:
@@ -78,7 +80,7 @@ def energy(
 
 
 SENSORS = (
-    power("pv_power", "Solar power"),
+    power("pv_power", "Instantaneous Solar Production"),
     measurement("pv1_voltage", "PV1 voltage", UnitOfElectricPotential.VOLT, SensorDeviceClass.VOLTAGE),
     measurement("pv1_current", "PV1 current", UnitOfElectricCurrent.AMPERE, SensorDeviceClass.CURRENT),
     power("pv1_power", "PV1 power"),
@@ -99,7 +101,9 @@ SENSORS = (
     energy("grid_import_total", "Grid imported energy total"),
     energy("grid_export_today", "Grid exported energy today"),
     energy("grid_export_total", "Grid exported energy total"),
-    power("battery_power", "Battery power"),
+    power("battery_power", "Instantaneous Battery Power"),
+    SolarMaxSensorDescription(key="battery_charging_power", source_key="battery_power", name="Instantaneous Battery Charging Power", battery_direction="charging", native_unit_of_measurement=UnitOfPower.WATT, device_class=SensorDeviceClass.POWER, state_class=SensorStateClass.MEASUREMENT),
+    SolarMaxSensorDescription(key="battery_discharging_power", source_key="battery_power", name="Instantaneous Battery Discharging Power", battery_direction="discharging", native_unit_of_measurement=UnitOfPower.WATT, device_class=SensorDeviceClass.POWER, state_class=SensorStateClass.MEASUREMENT),
     SolarMaxSensorDescription(key="battery_soc", source_key="battery_soc", name="Battery state of charge", native_unit_of_measurement=PERCENTAGE, device_class=SensorDeviceClass.BATTERY, state_class=SensorStateClass.MEASUREMENT),
     measurement("battery_voltage", "Battery voltage", UnitOfElectricPotential.VOLT, SensorDeviceClass.VOLTAGE),
     measurement("battery_current", "Battery current", UnitOfElectricCurrent.AMPERE, SensorDeviceClass.CURRENT),
@@ -156,7 +160,13 @@ class SolarMaxSensor(CoordinatorEntity[DirectSolarMaxCoordinator], SensorEntity)
     @property
     def native_value(self):
         sensor = self.coordinator.data.get("sensors", {}).get(self.entity_description.source_key)
-        return None if sensor is None else sensor.get(self.entity_description.value_field)
+        if sensor is None:
+            return None
+        value = sensor.get(self.entity_description.value_field)
+        if self.entity_description.battery_direction:
+            charging, discharging = split_direct_battery_power(value)
+            return charging if self.entity_description.battery_direction == "charging" else discharging
+        return value
 
     @property
     def available(self) -> bool:

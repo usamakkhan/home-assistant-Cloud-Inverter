@@ -22,3 +22,11 @@ def split_grid_power(value: object) -> tuple[float | None, float | None]:
     if power is None:
         return None, None
     return max(power, 0.0), max(-power, 0.0)
+
+
+def split_direct_battery_power(value: object) -> tuple[float | None, float | None]:
+    """Split local battery watts: negative is charging, positive discharging."""
+    power = numeric_state(value)
+    if power is None:
+        return None, None
+    return max(-power, 0.0), max(power, 0.0)
