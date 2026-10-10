@@ -1,7 +1,7 @@
 {
   "domain": "cloud_inverter",
   "name": "Solar Touch",
-  "version": "1.5.7",
+  "version": "1.5.8",
   "documentation": "https://github.com/usamakkhan/home-assistant-Solar-Touch",
   "issue_tracker": "https://github.com/usamakkhan/home-assistant-Solar-Touch/issues",
   "requirements": ["aiohttp>=3.8.0", "cryptography>=41.0.0"],

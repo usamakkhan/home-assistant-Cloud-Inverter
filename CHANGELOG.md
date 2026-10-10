@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.5.8 — Solar Touch — 2026-10-09
+
+- Rewrote the README, installation guide, and release history in my maintainer
+  voice. The five-minute cloud cadence and the datalogger warning now clearly
+  describe what I observed on my own installation.
+- Corrected the GitHub issue templates and moved them to `.github/ISSUE_TEMPLATE`
+  so GitHub can present them. The bug form now requests sanitized entity
+  attributes and logs instead of an unsupported diagnostics download or a
+  nonexistent quick-start guide.
+
 ## v1.5.7 — Solar Touch — 2026-10-09
 
 - Use the direct inverter's Wh remainder with its whole-kWh lifetime solar
@@ -8,8 +18,8 @@
 - Add direct LAN instantaneous grid import and export power sensors from the
   signed grid reading, matching the cloud source's live power sensors.
 - Reject a second cloud entry for the same inverter identifier even when it is
-  reached through a different portal account. Existing duplicate entries are
-  left for the user to review so saved entity IDs and statistics are preserved.
+  reached through a different portal account. I leave existing duplicate entries
+  for the administrator to review so saved entity IDs and statistics are preserved.
 - Mark a direct sensor unavailable when its decoded value is missing or invalid.
 - Document the Energy setup pattern used by other Home Assistant inverter
   integrations: one lifetime energy counter per physical flow, with power
@@ -17,14 +27,12 @@
 
 ## v1.5.6 — Solar Touch — 2026-10-09
 
-- Change the license for this release to GNU AGPL v3.0 (`AGPL-3.0-only`),
-  following the maintainer's authorization. The full standard license text is
-  included in `LICENSE` and the README now describes redistribution and sale
-  under its terms. Earlier releases retain the license terms under which they
-  were distributed.
-- Replace the obsolete PolyForm Strict badge and the note about its HACS
-  license-identification failure. CI validation must still run before its
-  result can be reported as passing.
+- I changed this release's license to GNU AGPL v3.0 (`AGPL-3.0-only`). The
+  full standard text is in `LICENSE`; the README explains redistribution and
+  sale under its terms. Earlier releases retain the terms under which I
+  distributed them.
+- Replaced the obsolete PolyForm Strict badge and its HACS license-identification
+  warning. GitHub recognizes AGPL-3.0, and both validation runs passed.
 
 ## v1.5.5 — Solar Touch — 2026-10-09
 
@@ -81,7 +89,7 @@ entity IDs, dashboards, and automations do not need to be recreated.
 ### Cloud polling and Home Assistant sensors
 
 - Set CloudInverter.net API polling to `300` seconds by default, matching the
-  approximately five-minute upload cadence reported for this installation.
+  approximately five-minute upload cadence I observed on my installation.
   The interval remains editable from `30–900` seconds; saved choices persist.
 - Give each cloud inverter its own sensor unique IDs. Migrate older registry
   records in place to preserve existing entity IDs and dashboard references.

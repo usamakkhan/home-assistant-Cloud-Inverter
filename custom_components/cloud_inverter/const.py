@@ -31,7 +31,7 @@ DEFAULT_DIRECT_UNIT_ID = 1
 DEFAULT_DIRECT_SCAN_INTERVAL = 180
 
 # Cloud API polling (seconds). The inverter uploads to the vendor roughly every
-# five minutes on the reported installation; faster polling usually repeats data.
+# five minutes on my installation; faster polling usually repeats data.
 UPDATE_INTERVAL = 300
 MIN_CLOUD_SCAN_INTERVAL = 30
 

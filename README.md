@@ -24,7 +24,7 @@ display name changes to Solar Touch.
 > **Current release license:** [GNU Affero General Public License v3.0](https://github.com/usamakkhan/home-assistant-Solar-Touch/blob/main/LICENSE) (`AGPL-3.0-only`). Copyright © 2026 Usama Khan. The license permits use, modification, redistribution, and sale under its conditions, including source availability and preservation of notices. Earlier copies released under MIT or PolyForm Strict retain their original license terms; this change does not retroactively alter those copies.
 
 > [!IMPORTANT]
-> On the installation reported by the project owner, the **inverter uploads data to CloudInverter.net about every five minutes**. A Home Assistant cloud refresh can happen more often, but it may receive the **same uploaded reading** until the inverter sends its next update. The integration does not control the inverter's upload schedule.
+> In my installation, the **inverter uploads data to CloudInverter.net about every five minutes**. A Home Assistant cloud refresh can happen more often, but it may receive the **same uploaded reading** until the inverter sends its next update. Solar Touch does not control the inverter's upload schedule.
 
 ## 🧭 Choose your data source
 
@@ -41,7 +41,7 @@ display name changes to Solar Touch.
 
 ```mermaid
 flowchart LR
-    I["☀️ Inverter"] -->|"reported cloud upload: about 5 min"| C["☁️ CloudInverter.net"]
+    I["☀️ Inverter"] -->|"observed cloud upload: about 5 min"| C["☁️ CloudInverter.net"]
     H["🏠 Home Assistant"] -->|"cloud API check: 300 s default"| C
     H -->|"direct Modbus read: 180 s default"| I
     classDef device fill:#FFF3C4,stroke:#C68810,color:#242424
@@ -52,7 +52,7 @@ flowchart LR
     class C cloud
 ```
 
-The diagram shows the two available paths; select one when adding the integration. The reported five-minute upload is **device-to-cloud traffic**, while the 300-second and 180-second values are **Home Assistant read intervals**. Matching the cloud interval to the reported upload cadence avoids most repeated API requests, but the two clocks are not synchronized. A direct LAN capture can be delayed by a quiet window around the estimated cloud upload period, so its actual spacing may exceed 180 seconds.
+The diagram shows the two available paths; select one when adding the integration. The roughly five-minute upload I observed is **device-to-cloud traffic**, while the 300-second and 180-second values are **Home Assistant read intervals**. Matching the cloud interval to the observed upload cadence avoids most repeated API requests, but the two clocks are not synchronized. A direct LAN capture can be delayed by a quiet window around the estimated cloud upload period, so its actual spacing may exceed 180 seconds.
 
 ## 📊 What data appears in Home Assistant?
 
@@ -146,7 +146,7 @@ See the [detailed installation guide](https://github.com/usamakkhan/home-assista
 The initial probe confirms that a Modbus response came from the entered endpoint; it does not guarantee that every register on every model/firmware is supported. Direct collection runs **inside Home Assistant** on the configured Modbus/TCP port.
 
 > [!CAUTION]
-> A 10-second interval is permitted, but frequent Modbus reads **interrupted cloud delivery and turned the datalogger light red on the reported installation**. Start at 180 seconds, observe the datalogger and portal over multiple five-minute upload cycles, and adjust only if your hardware tolerates it. The collector uses estimated quiet windows near the five-minute boundary; these cannot guarantee uninterrupted cloud uploads because the actual upload phase can vary.
+> A 10-second interval is permitted, but on my installation frequent Modbus reads **interrupted cloud delivery and turned the datalogger light red**. Start at 180 seconds, observe the datalogger and portal over multiple five-minute upload cycles, and adjust only if your hardware tolerates it. The collector uses estimated quiet windows near the five-minute boundary; these cannot guarantee uninterrupted cloud uploads because the actual upload phase can vary.
 
 ## ☁️ Set up CloudInverter.net
 
@@ -155,7 +155,7 @@ The initial probe confirms that a Modbus response came from the entered endpoint
 3. Wait for the first API update, then inspect the device and sensor states.
 4. If desired, change the API refresh interval in **Options** (30–900 seconds).
 
-The default is **300 seconds (5 minutes)** because the inverter uploads about that often on the reported installation. Even at this interval, consecutive requests can return the same snapshot if the upload and polling clocks do not line up or a cloud update is delayed. You can select 30–900 seconds in Options. Changing the Home Assistant refresh interval does **not** change how often the inverter transmits to the vendor. Existing entries with a custom interval saved in Options keep that choice.
+I chose a **300-second (5-minute)** default because my inverter uploads about that often. Even at this interval, consecutive requests can return the same snapshot if the upload and polling clocks do not line up or a cloud update is delayed. You can select 30–900 seconds in Options. Changing the Home Assistant refresh interval does **not** change how often the inverter transmits to the vendor. Existing entries with a custom interval saved in Options keep that choice.
 
 Credentials are stored in the Home Assistant config entry; the API session token is kept in memory. Protect Home Assistant backups. If website login works but integration login fails, check the portal/API status and share only sanitized logs in an issue.
 
@@ -175,8 +175,8 @@ Removing an old entry may remove its Home Assistant entities. Review dashboards 
 | Portal website accepts login but the integration rejects it | Verify the same account, current portal availability, and the sanitized Home Assistant API error. Website and API responses can differ. Never post credentials or tokens. |
 | Direct IP check fails | Verify the inverter IP, Modbus/TCP port (default `502`), unit ID (default `1`), LAN routing, and bridge availability from the Home Assistant host. |
 | IP check succeeds but sensors are unavailable | The probe checks one register. Verify the PV9000-compatible profile, wait for the full capture and quiet window, then inspect sanitized Modbus errors in Home Assistant logs. |
-| Cloud readings repeat | Check the reading timestamp and allow for the reported **about-five-minute** inverter upload cadence. More frequent API requests can return the same snapshot. |
-| Cloud uploads stop or datalogger turns red | Increase the direct collection interval or stop local collection while you check the hardware. The reported installation had this behavior with 10-second polling. |
+| Cloud readings repeat | Allow for the **about-five-minute** inverter upload cadence observed on my installation. More frequent API requests can return the same snapshot. |
+| Cloud uploads stop or datalogger turns red | Increase the direct collection interval or stop local collection while you check the hardware. I observed this behavior with 10-second polling. |
 | An older Local analyzer entry fails after updating | Remove that entry and add the direct LAN source using the inverter's own IP and Modbus/TCP port. Review entity IDs used by dashboards and automations. |
 
 Temporary debug logging:

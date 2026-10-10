@@ -9,7 +9,7 @@ This guide installs the Solar Touch integration in Home Assistant and connects i
 | 🏠 Direct inverter LAN | Home Assistant can reach the inverter's SolarMax/Senergy PV9000 Modbus/TCP bridge | **180 seconds** between collection attempts |
 | ☁️ CloudInverter.net | A portal account with an inverter and internet access from Home Assistant | **300 seconds (5 minutes)** between API requests |
 
-The inverter on the reported installation uploads to CloudInverter.net **about every five minutes**. Cloud API polling does not change that device upload schedule. Direct LAN collection uses a separate interval and may be delayed around estimated upload windows.
+In my installation, the inverter uploads to CloudInverter.net **about every five minutes**. Cloud API polling does not change that device upload schedule. Direct LAN collection uses a separate interval and may be delayed around estimated upload windows.
 
 Examples in this guide use `192.168.50.10` as an **example inverter IP** and `ABCDE123456789` as an **example serial**. Replace these locally; do not publish your real address or serial in screenshots or issues.
 
@@ -49,7 +49,7 @@ The IP probe proves that this endpoint answered one Modbus request; full sensor 
 Open the Solar Touch entry's **Options** to change the inverter IP, Modbus/TCP port, unit ID, or collection interval. The interval accepts **10–900 seconds**. The default is **180 seconds**.
 
 > [!CAUTION]
-> On the reported installation, a 10-second local polling interval interrupted cloud uploads and made the datalogger light turn red. Start at 180 seconds, observe the datalogger and portal over several five-minute upload cycles, and change the interval only if your hardware tolerates it. Estimated quiet windows can delay a capture; they cannot guarantee cloud delivery.
+> On my installation, a 10-second local polling interval interrupted cloud uploads and made the datalogger light turn red. Start at 180 seconds, observe the datalogger and portal over several five-minute upload cycles, and change the interval only if your hardware tolerates it. Estimated quiet windows can delay a capture; they cannot guarantee cloud delivery.
 
 ## 2B. Connect to CloudInverter.net
 
@@ -58,7 +58,7 @@ Open the Solar Touch entry's **Options** to change the inverter IP, Modbus/TCP p
 3. Wait for the first API update and inspect the new device's sensors.
 4. If needed, open **Options** to change the API refresh interval (**30–900 seconds**). The default is **300 seconds (5 minutes)**.
 
-The inverter reportedly uploads to the portal about every five minutes. Two API checks can still show the same values if upload timing and API polling do not align. An explicit interval saved earlier in Options remains in effect after an update until you change it.
+My inverter uploads to the portal about every five minutes. Two API checks can still show the same values if upload timing and API polling do not align. An explicit interval saved earlier in Options remains in effect after an update until you change it.
 
 If the integration rejects credentials that work on the website, verify account details and portal availability, then collect a **sanitized** Home Assistant error for an issue. Website and API behavior can differ. Never share passwords, session tokens, account IDs, or real serials.
 
@@ -86,7 +86,7 @@ Existing **direct inverter LAN** and **CloudInverter.net** entries do not need t
 - **Solar Touch missing:** check `/config/custom_components/cloud_inverter/manifest.json` and restart.
 - **Direct IP check fails:** check the inverter's IP, Modbus/TCP port, unit ID, network route, and bridge availability from the Home Assistant host.
 - **Direct check succeeds but sensors are unavailable:** wait for the full capture and quiet window, confirm PV9000 profile compatibility, and inspect sanitized Modbus errors in Home Assistant logs.
-- **Cloud readings repeat:** allow for the reported five-minute inverter upload period; API polling can receive the previous snapshot.
+- **Cloud readings repeat:** allow for the five-minute upload period I observed; API polling can receive the previous snapshot.
 - **Datalogger turns red or cloud updates stop:** increase the direct collection interval or stop local collection while checking hardware behavior.
 - **Old Local analyzer entry fails:** remove that entry and add the direct source using the inverter's own LAN IP.
 
