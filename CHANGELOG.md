@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.5.1 — 2026-10-09
+
+- Treat an empty CloudInverter.net response as a failed refresh. Home Assistant
+  retries initial setup or marks existing sensors unavailable until the next
+  successful poll, rather than registering an "unknown" device.
+- Keep the cloud device identifier tied to the selected inverter and avoid
+  publishing a false zero battery power when charge/discharge values are invalid.
+- Skip unnecessary entity state updates when the cloud returns an unchanged
+  snapshot. The cloud refresh interval and existing entity IDs are unchanged.
+- Remove MIT-licensed v1.3.5 through v1.4.3 release and tag listings from the
+  official repository. Prior MIT grants cannot be revoked retroactively.
+
 ## 1.5.0 — 2026-10-09
 
 - License this release under the **PolyForm Strict License 1.0.0**. The new
@@ -74,7 +86,7 @@ Consolidated changes originally published throughout the 1.3 series:
 
 This is a historical release. Version 1.4.0 later removed the separate
 standalone analyzer and its legacy cached HTTP source; new installations
-should use the latest 1.4.x release.
+should use the latest release.
 
 ## 1.2.0 — 2026-10-09
 

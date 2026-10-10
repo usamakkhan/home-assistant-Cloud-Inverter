@@ -78,7 +78,8 @@ async def async_setup_entry(
     
     # Create coordinator
     coordinator = CloudInverterDataUpdateCoordinator(
-        hass, api, int(entry.options.get(CONF_SCAN_INTERVAL, UPDATE_INTERVAL)), entry.entry_id
+        hass, api, int(entry.options.get(CONF_SCAN_INTERVAL, UPDATE_INTERVAL)), entry.entry_id,
+        goods_id,
     )
     try:
         await coordinator.async_config_entry_first_refresh()
@@ -198,16 +199,18 @@ async def async_setup_entry(
 class CloudInverterDataUpdateCoordinator(DataUpdateCoordinator):
     """Class to manage fetching Cloud Inverter data."""
 
-    def __init__(self, hass: HomeAssistant, api: CloudInverterAPI, interval_seconds: int, entry_id: str) -> None:
+    def __init__(self, hass: HomeAssistant, api: CloudInverterAPI, interval_seconds: int, entry_id: str, goods_id: str | None) -> None:
         """Initialize coordinator."""
         super().__init__(
             hass,
             _LOGGER,
             name=DOMAIN,
             update_interval=timedelta(seconds=max(30, interval_seconds)),
+            always_update=False,
         )
         self.api = api
         self.entry_id = entry_id
+        self.goods_id = goods_id
 
     async def _async_update_data(self) -> dict[str, Any]:
         """Fetch data from API."""
@@ -216,8 +219,7 @@ class CloudInverterDataUpdateCoordinator(DataUpdateCoordinator):
             
             if not data:
                 _LOGGER.warning("No data returned from API")
-                # Return empty dict but don't fail - sensors will show unavailable
-                return {}
+                raise UpdateFailed("Cloud Inverter returned no data")
             
             # Flatten the data structure for easier access
             flattened_data = {}
@@ -263,11 +265,13 @@ class CloudInverterDataUpdateCoordinator(DataUpdateCoordinator):
                     from_bat = float(flattened_data.get("fromPbat", 0) or 0)
                     flattened_data["battery_power"] = to_bat - from_bat
                 except (ValueError, TypeError):
-                    flattened_data["battery_power"] = 0
+                    pass
             
             _LOGGER.debug("Inverter update contains %d fields", len(flattened_data))
             return flattened_data
             
+        except UpdateFailed:
+            raise
         except Exception as err:
             _LOGGER.error("Error communicating with API: %s", err, exc_info=True)
             raise UpdateFailed(f"Error communicating with API: {err}")
@@ -318,7 +322,7 @@ class CloudInverterSensor(CoordinatorEntity, SensorEntity):
     def device_info(self):
         """Return device information about this entity."""
         return {
-            "identifiers": {(DOMAIN, self.coordinator.data.get("GoodsID", "unknown"))},
+            "identifiers": {(DOMAIN, self.coordinator.goods_id or self.coordinator.data.get("GoodsID") or self.coordinator.entry_id)},
             "name": f"Cloud Inverter {self.coordinator.data.get('modelName', 'Unknown')}",
             "manufacturer": "SolarMax",
             "model": self.coordinator.data.get("modelName", "Unknown"),
