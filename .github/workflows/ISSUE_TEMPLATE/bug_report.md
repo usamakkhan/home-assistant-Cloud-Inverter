@@ -1,6 +1,6 @@
 ---
 name: Bug Report
-about: Report a bug to help us improve the Cloud Inverter integration
+about: Report a bug to help us improve the Solar Touch integration
 title: "[BUG] "
 labels: bug
 assignees: usama-khursheed
@@ -44,7 +44,7 @@ Settings → System → System Health → Copy Information
  📝 Integration Diagnostic Data
 To get diagnostic data:
 1. Go to Settings → Devices & Services
-2. Find Cloud Inverter integration
+2. Find Solar Touch integration
 3. Click the three dots → Download diagnostics
 
 Paste diagnostic file here (or key information):
@@ -100,6 +100,6 @@ How critical is this bug?
 
 ---
 
-Thank you for helping improve the Cloud Inverter integration! 🙏
+Thank you for helping improve the Solar Touch integration! 🙏
 
 Note: Please provide as much detail as possible. Issues without sufficient information may be closed.

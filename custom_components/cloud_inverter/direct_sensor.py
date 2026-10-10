@@ -176,7 +176,7 @@ class SolarMaxSensor(CoordinatorEntity[DirectSolarMaxCoordinator], SensorEntity)
         )
         return DeviceInfo(
             identifiers={(DOMAIN, identity)},
-            name="Cloud Inverter Direct",
+            name="Solar Touch Direct",
             manufacturer="SolarMax / Senergy",
             model=model,
         )

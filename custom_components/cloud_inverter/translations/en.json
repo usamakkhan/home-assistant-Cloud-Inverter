@@ -5,7 +5,7 @@
         "data": {
           "source": "Data source"
         },
-        "title": "Cloud Inverter Setup",
+        "title": "Solar Touch Setup",
         "description": "Choose where Home Assistant should read inverter data."
       },
       "select_inverter": {
@@ -39,7 +39,7 @@
       }
     },
     "error": {
-      "cannot_connect": "Failed to connect to Cloud Inverter API. Please check your internet connection and try again.",
+      "cannot_connect": "Failed to connect to CloudInverter.net. Please check your internet connection and try again.",
       "invalid_auth": "Invalid username or password. Please check your credentials and try again.",
       "no_inverters": "No inverters found in your account. Please add an inverter to your CloudInverter.net account first.",
       "unknown": "An unexpected error occurred. Please check the logs and try again.",

@@ -18,6 +18,13 @@ PLATFORMS: list[Platform] = [Platform.SENSOR]
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Cloud Inverter from a config entry."""
+    # Keep user-customized titles; migrate only titles created by older releases.
+    if entry.title == "Cloud Inverter Direct":
+        hass.config_entries.async_update_entry(entry, title="Solar Touch Direct")
+    elif entry.title.startswith("Cloud Inverter ("):
+        hass.config_entries.async_update_entry(
+            entry, title="Solar Touch (" + entry.title[len("Cloud Inverter ("):]
+        )
     hass.data.setdefault(DOMAIN, {})
     
     # Keep only the selected inverter reference in integration state.

@@ -167,7 +167,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             return await self.async_step_direct()
         if user_input is not None:
             return self.async_create_entry(
-                title="Cloud Inverter Direct",
+                title="Solar Touch Direct",
                 data=self._direct_data,
             )
         return self.async_show_form(
@@ -308,7 +308,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if self.api:
             await self.api.close()
         
-        title = f"Cloud Inverter ({selected_inverter['model']})"
+        title = f"Solar Touch ({selected_inverter['model']})"
         
         return self.async_create_entry(
             title=title,

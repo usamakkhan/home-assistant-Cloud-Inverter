@@ -299,7 +299,7 @@ class CloudInverterSensor(CoordinatorEntity, SensorEntity):
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._data_key = data_key
-        self._attr_name = f"Cloud Inverter {name}"
+        self._attr_name = f"Solar Touch {name}"
         self._attr_unique_id = cloud_sensor_unique_id(coordinator.entry_id, data_key)
         self._attr_native_unit_of_measurement = unit
         self._attr_device_class = device_class
@@ -330,7 +330,7 @@ class CloudInverterSensor(CoordinatorEntity, SensorEntity):
         """Return device information about this entity."""
         return {
             "identifiers": {(DOMAIN, self.coordinator.goods_id or self.coordinator.data.get("GoodsID") or self.coordinator.entry_id)},
-            "name": f"Cloud Inverter {self.coordinator.data.get('modelName', 'Unknown')}",
+            "name": f"Solar Touch {self.coordinator.data.get('modelName', 'Unknown')}",
             "manufacturer": "SolarMax",
             "model": self.coordinator.data.get("modelName", "Unknown"),
             "sw_version": self.coordinator.data.get("FirmwareVersion", "Unknown"),

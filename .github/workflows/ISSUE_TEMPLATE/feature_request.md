@@ -84,6 +84,6 @@ Feel free to share any additional thoughts or discussion about this feature.
 
 ---
 
-Thank you for your suggestion! We appreciate community feedback to help improve the Cloud Inverter integration! 🙏
+Thank you for your suggestion! We appreciate community feedback to help improve the Solar Touch integration! 🙏
 
 Note: Feature requests will be reviewed and discussed. Not all requests may be implemented, but all suggestions are valuable for understanding user needs.

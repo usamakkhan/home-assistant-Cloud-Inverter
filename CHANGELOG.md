@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.5.3 — 2026-10-09
+
+- Rename the integration displayed by Home Assistant and HACS to **Solar Touch**.
+  Update setup screens, new entry/device/sensor names, installation guides,
+  and issue templates.
+- Update automatically created titles on existing config entries. Preserve
+  user-customized titles, the `cloud_inverter` domain, unique IDs, and existing
+  entity IDs so dashboards and automations continue to work.
+- Keep **CloudInverter.net** as the name of the vendor cloud data source.
+
 ## 1.5.2 — 2026-10-09
 
 - Add **Instantaneous Power Import** and **Instantaneous Power Export** cloud

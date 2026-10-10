@@ -1,6 +1,6 @@
-# ☀️ Cloud Inverter installation guide
+# ☀️ Solar Touch installation guide
 
-This guide installs the Cloud Inverter integration in Home Assistant and connects it through either **Get Data Locally using Inverter IP** or **CloudInverter.net**. Local collection runs inside Home Assistant.
+This guide installs the Solar Touch integration in Home Assistant and connects it through either **Get Data Locally using Inverter IP** or **CloudInverter.net**. Local collection runs inside Home Assistant.
 
 ## Before you start
 
@@ -21,7 +21,7 @@ Use **HACS** or **manual installation**. Both provide the same integration.
 
 1. Install and open [HACS](https://www.hacs.xyz/docs/use/) in Home Assistant.
 2. Add `https://github.com/usamakkhan/home-assistant-Cloud-Inverter` as a custom **Integration** repository. See the [HACS custom repository guide](https://www.hacs.dev/docs/faq/custom_repositories/) if the menu has changed.
-3. Find **Cloud Inverter** in HACS and install it.
+3. Find **Solar Touch** in HACS and install it.
 4. **Restart Home Assistant.** A pending restart in HACS means Home Assistant has not yet loaded the new files.
 
 ### Manual
@@ -30,12 +30,12 @@ Use **HACS** or **manual installation**. Both provide the same integration.
 2. Copy the whole `custom_components/cloud_inverter` directory into Home Assistant's `/config/custom_components/` directory. Check that `/config/custom_components/cloud_inverter/manifest.json` exists.
 3. Restart Home Assistant. Copying files does not load a new integration until restart.
 
-If **Cloud Inverter** is absent from **Settings → Devices & services → Add integration**, verify the destination path has only one `custom_components` directory level, then restart again.
+If **Solar Touch** is absent from **Settings → Devices & services → Add integration**, verify the destination path has only one `custom_components` directory level, then restart again.
 
 ## 2A. Connect directly to the inverter
 
 1. Find the **inverter's LAN IP** in your network configuration. Confirm Home Assistant can reach its Modbus/TCP bridge. The default Modbus/TCP port is **502**, but the setup form allows an override.
-2. In Home Assistant, open **Settings → Devices & services → Add integration → Cloud Inverter** and select **Get Data Locally using Inverter IP**.
+2. In Home Assistant, open **Settings → Devices & services → Add integration → Solar Touch** and select **Get Data Locally using Inverter IP**.
 3. Enter the inverter's IP, such as `192.168.50.10`. Enter the inverter's **Modbus/TCP port** separately; leave it at `502` unless your bridge uses another port. Leave **Modbus unit ID** at `1` unless your device requires another value.
 4. Leave **Inverter collection interval** at **180 seconds** initially. Submit the form.
 5. Home Assistant sends a read-only request for register `0x1001`. If the IP, port, unit ID, or response fails, correct the form and retry.
@@ -46,14 +46,14 @@ The IP probe proves that this endpoint answered one Modbus request; full sensor 
 
 ### Adjust direct collection
 
-Open the Cloud Inverter entry's **Options** to change the inverter IP, Modbus/TCP port, unit ID, or collection interval. The interval accepts **10–900 seconds**. The default is **180 seconds**.
+Open the Solar Touch entry's **Options** to change the inverter IP, Modbus/TCP port, unit ID, or collection interval. The interval accepts **10–900 seconds**. The default is **180 seconds**.
 
 > [!CAUTION]
 > On the reported installation, a 10-second local polling interval interrupted cloud uploads and made the datalogger light turn red. Start at 180 seconds, observe the datalogger and portal over several five-minute upload cycles, and change the interval only if your hardware tolerates it. Estimated quiet windows can delay a capture; they cannot guarantee cloud delivery.
 
 ## 2B. Connect to CloudInverter.net
 
-1. In Home Assistant, open **Settings → Devices & services → Add integration → Cloud Inverter** and select **CloudInverter.net**.
+1. In Home Assistant, open **Settings → Devices & services → Add integration → Solar Touch** and select **CloudInverter.net**.
 2. Enter your portal username and password. If your account has multiple inverters, select the intended device.
 3. Wait for the first API update and inspect the new device's sensors.
 4. If needed, open **Options** to change the API refresh interval (**30–900 seconds**). The default is **300 seconds (5 minutes)**.
@@ -70,20 +70,20 @@ If a sensor is absent from the Energy selector, find it in **Settings → Develo
 
 ## Upgrade from an older analyzer based setup
 
-Version **1.4.0** removes the former standalone analyzer application, its HTTP source, and its companion Home Assistant connector from this repository. If you previously created a **Local analyzer** entry in Cloud Inverter:
+Version **1.4.0** removes the former standalone analyzer application, its HTTP source, and its companion Home Assistant connector from this repository. If you previously created a **Local analyzer** entry in Solar Touch:
 
-1. Open **Settings → Devices & services → Cloud Inverter** and remove the old Local analyzer entry.
-2. Add Cloud Inverter again and select **Get Data Locally using Inverter IP**.
+1. Open **Settings → Devices & services → Solar Touch** and remove the old Local analyzer entry.
+2. Add Solar Touch again and select **Get Data Locally using Inverter IP**.
 3. Enter the **inverter's own IP**, not the old analyzer computer's IP. Use its Modbus/TCP port (normally `502`) and unit ID (normally `1`).
 4. Review dashboards and automations that use old entity IDs, as removing the old entry may remove those entities.
 
-Existing **direct inverter LAN** and **CloudInverter.net** entries do not need to be recreated. If you previously ran the analyzer on another computer, stopping that separate process is an action on that computer; updating this Home Assistant integration does not stop it for you. Historical releases remain available on GitHub if you need their old files.
+Existing **direct inverter LAN** and **CloudInverter.net** entries do not need to be recreated. If you previously ran the analyzer on another computer, stopping that separate process is an action on that computer; updating this Home Assistant integration does not stop it for you.
 
 ## Updating and troubleshooting
 
 - **HACS:** install the update in HACS, then restart Home Assistant.
 - **Manual:** replace `/config/custom_components/cloud_inverter` with the new integration directory and restart Home Assistant.
-- **Cloud Inverter missing:** check `/config/custom_components/cloud_inverter/manifest.json` and restart.
+- **Solar Touch missing:** check `/config/custom_components/cloud_inverter/manifest.json` and restart.
 - **Direct IP check fails:** check the inverter's IP, Modbus/TCP port, unit ID, network route, and bridge availability from the Home Assistant host.
 - **Direct check succeeds but sensors are unavailable:** wait for the full capture and quiet window, confirm PV9000 profile compatibility, and inspect sanitized Modbus errors in Home Assistant logs.
 - **Cloud readings repeat:** allow for the reported five-minute inverter upload period; API polling can receive the previous snapshot.
