@@ -21,7 +21,7 @@ existing entity ID may still start with `sensor.cloud_inverter_` after the
 display name changes to Solar Touch.
 
 > [!NOTE]
-> **License from v1.5.0:** [PolyForm Strict License 1.0.0](https://github.com/usamakkhan/home-assistant-Solar-Touch/blob/main/LICENSE). It permits noncommercial use but does not grant permission to redistribute the integration, sell copies, or publish modified versions. Copyright © 2026 Usama Khan. Earlier versions released under MIT retain their original license terms.
+> **Current release license:** [PolyForm Strict License 1.0.0](https://github.com/usamakkhan/home-assistant-Solar-Touch/blob/main/LICENSE). It permits noncommercial use but does not grant permission to redistribute the integration, sell copies, or publish modified versions. Copyright © 2026 Usama Khan. Earlier copies released under MIT retain their original license terms.
 
 > [!IMPORTANT]
 > GitHub currently reports PolyForm Strict as an unidentified license (`NOASSERTION`), so this repository's **HACS validation action fails its license check**. The code tests pass. If HACS does not offer this version, use the [manual installation steps](https://github.com/usamakkhan/home-assistant-Solar-Touch/blob/main/INSTALL.md#manual). The project will not label this release as MIT to make validation pass because that would grant rights the maintainer has not offered.
@@ -141,7 +141,7 @@ Accounts with multiple inverters can add a separate CloudInverter.net entry for 
 
 ## 🔄 Upgrading from an older analyzer setup
 
-Version 1.4.0 removes the separate analyzer application and its cached HTTP source. If you previously configured **Local analyzer** in Solar Touch, remove that entry from **Settings → Devices & services**, then add **Get Data Locally using Inverter IP**. Enter the **inverter's own LAN IP**, Modbus/TCP port (default `502`), and unit ID (default `1`). An analyzer computer's address or HTTP port cannot be reused as the inverter endpoint. Existing direct LAN and cloud entries continue to use their saved settings.
+The current release no longer includes the separate analyzer application or its cached HTTP source. If you previously configured **Local analyzer** in Solar Touch, remove that entry from **Settings → Devices & services**, then add **Get Data Locally using Inverter IP**. Enter the **inverter's own LAN IP**, Modbus/TCP port (default `502`), and unit ID (default `1`). An analyzer computer's address or HTTP port cannot be reused as the inverter endpoint. Existing direct LAN and cloud entries continue to use their saved settings.
 
 Removing an old entry may remove its Home Assistant entities. Review dashboards and automations that refer to their entity IDs after adding the direct source.
 
@@ -171,4 +171,4 @@ Remove or redact passwords, tokens, account IDs, serials, MAC addresses, and pri
 
 - Run the integration tests with `python -m unittest discover -s tests -v`. They cover signing, URL validation, direct Modbus checks, capture behavior, and freshness logic; they do not replace a real inverter and Home Assistant test.
 - Review release changes in the [changelog](https://github.com/usamakkhan/home-assistant-Solar-Touch/blob/main/CHANGELOG.md) and report reproducible problems through [GitHub Issues](https://github.com/usamakkhan/home-assistant-Solar-Touch/issues), using sanitized details.
-- Versions from v1.5.0 use the [PolyForm Strict License 1.0.0](https://github.com/usamakkhan/home-assistant-Solar-Touch/blob/main/LICENSE). For redistribution or commercial licensing, contact the copyright holder. Bundled integration icons live in [`brand/`](https://github.com/usamakkhan/home-assistant-Solar-Touch/tree/main/custom_components/cloud_inverter/brand); [Home Assistant's brand image guidance](https://developers.home-assistant.io/docs/core/integration/brand_images/) explains how Home Assistant displays integration assets.
+- The current release uses the [PolyForm Strict License 1.0.0](https://github.com/usamakkhan/home-assistant-Solar-Touch/blob/main/LICENSE). For redistribution or commercial licensing, contact the copyright holder. Bundled integration icons live in [`brand/`](https://github.com/usamakkhan/home-assistant-Solar-Touch/tree/main/custom_components/cloud_inverter/brand); [Home Assistant's brand image guidance](https://developers.home-assistant.io/docs/core/integration/brand_images/) explains how Home Assistant displays integration assets.

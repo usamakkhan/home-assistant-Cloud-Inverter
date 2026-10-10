@@ -70,7 +70,7 @@ If a sensor is absent from the Energy selector, find it in **Settings → Develo
 
 ## Upgrade from an older analyzer based setup
 
-Version **1.4.0** removes the former standalone analyzer application, its HTTP source, and its companion Home Assistant connector from this repository. If you previously created a **Local analyzer** entry in Solar Touch:
+The current release does not include the former standalone analyzer application, its HTTP source, or its companion Home Assistant connector. If you previously created a **Local analyzer** entry in Solar Touch:
 
 1. Open **Settings → Devices & services → Solar Touch** and remove the old Local analyzer entry.
 2. Add Solar Touch again and select **Get Data Locally using Inverter IP**.
