@@ -21,7 +21,7 @@ existing entity ID may still start with `sensor.cloud_inverter_` after the
 display name changes to Solar Touch.
 
 > [!NOTE]
-> **Current release license:** [GNU Affero General Public License v3.0](https://github.com/usamakkhan/home-assistant-Solar-Touch/blob/main/LICENSE) (`AGPL-3.0-only`). Copyright © 2026 Usama Khan. The license permits use, modification, redistribution, and sale under its conditions, including source availability and preservation of notices. Earlier copies released under MIT or PolyForm Strict retain their original license terms; this change does not retroactively alter those copies.
+> **License:** [GNU Affero General Public License v3.0](https://github.com/usamakkhan/home-assistant-Solar-Touch/blob/main/LICENSE) (`AGPL-3.0-only`). Copyright © 2026 Usama Khan. The license permits use, modification, redistribution, and sale under its conditions, including source availability and preservation of notices.
 
 > [!IMPORTANT]
 > In my installation, the **inverter uploads data to CloudInverter.net about every five minutes**. A Home Assistant cloud refresh can happen more often, but it may receive the **same uploaded reading** until the inverter sends its next update. Solar Touch does not control the inverter's upload schedule.

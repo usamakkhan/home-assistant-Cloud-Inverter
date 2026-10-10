@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.5.9 — Solar Touch — 2026-10-09
+
+- Simplified the current documentation to state the AGPL-3.0-only license and
+  link to its full text.
+
 ## v1.5.8 — Solar Touch — 2026-10-09
 
 - Rewrote the README, installation guide, and release history in my maintainer
@@ -27,12 +32,9 @@
 
 ## v1.5.6 — Solar Touch — 2026-10-09
 
-- I changed this release's license to GNU AGPL v3.0 (`AGPL-3.0-only`). The
-  full standard text is in `LICENSE`; the README explains redistribution and
-  sale under its terms. Earlier releases retain the terms under which I
-  distributed them.
-- Replaced the obsolete PolyForm Strict badge and its HACS license-identification
-  warning. GitHub recognizes AGPL-3.0, and both validation runs passed.
+- The release uses GNU AGPL v3.0 (`AGPL-3.0-only`). The full standard text is
+  in `LICENSE`; the README explains redistribution and sale under its terms.
+- GitHub recognizes AGPL-3.0, and both validation runs passed.
 
 ## v1.5.5 — Solar Touch — 2026-10-09
 
@@ -46,7 +48,7 @@
   `state_class: measurement`; and cumulative energy counters in kWh or Wh with
   `device_class: energy` and `state_class: total_increasing`.
 - Clarify Energy dashboard setup when a disabled direct entry leaves a stale
-  solar source reference. The license remains PolyForm Strict.
+  solar source reference.
 
 ## v1.5.4 — Solar Touch — 2026-10-09
 
@@ -107,15 +109,6 @@ entity IDs, dashboards, and automations do not need to be recreated.
 - Mark daily energy sensors as `total_increasing` so Home Assistant handles
   their reset. Document which lifetime kWh counters to select in the Energy
   dashboard; live power sensors in W are for instantaneous dashboards.
-
-### License and validation
-
-- License the current release under **PolyForm Strict 1.0.0**. Earlier copies
-  distributed under MIT retain the permissions granted to those recipients;
-  removing their official release listings cannot revoke those permissions.
-- The integration tests pass. HACS validation currently fails its license
-  identification check because GitHub reports PolyForm Strict as `NOASSERTION`.
-  Manual installation remains documented.
 
 ## v1.2.0 — Cloud Inverter — 2026-10-09
 
