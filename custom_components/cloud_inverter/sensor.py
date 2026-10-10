@@ -1,4 +1,4 @@
-"""Sensor platform for Cloud Inverter."""
+"""Sensor platform for Solar Touch."""
 from __future__ import annotations
 
 import logging
@@ -53,7 +53,7 @@ async def async_setup_entry(
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up Cloud Inverter sensors."""
+    """Set up Solar Touch sensors."""
     if entry.data.get(CONF_SOURCE) == SOURCE_DIRECT:
         from .direct_sensor import async_setup_entry as async_setup_direct_sensors
 
@@ -199,7 +199,7 @@ async def async_setup_entry(
 
 
 class CloudInverterDataUpdateCoordinator(DataUpdateCoordinator):
-    """Class to manage fetching Cloud Inverter data."""
+    """Class to manage fetching Solar Touch data."""
 
     def __init__(self, hass: HomeAssistant, api: CloudInverterAPI, interval_seconds: int, entry_id: str, goods_id: str | None) -> None:
         """Initialize coordinator."""
@@ -221,7 +221,7 @@ class CloudInverterDataUpdateCoordinator(DataUpdateCoordinator):
             
             if not data:
                 _LOGGER.warning("No data returned from API")
-                raise UpdateFailed("Cloud Inverter returned no data")
+                raise UpdateFailed("Solar Touch cloud source returned no data")
             
             # Flatten the data structure for easier access
             flattened_data = {}
@@ -285,7 +285,7 @@ class CloudInverterDataUpdateCoordinator(DataUpdateCoordinator):
 
 
 class CloudInverterSensor(CoordinatorEntity, SensorEntity):
-    """Representation of a Cloud Inverter sensor."""
+    """Representation of a Solar Touch sensor."""
 
     def __init__(
         self,

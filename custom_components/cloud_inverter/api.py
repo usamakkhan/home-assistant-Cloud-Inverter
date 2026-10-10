@@ -1,4 +1,4 @@
-"""API Client for Cloud Inverter."""
+"""API Client for CloudInverter.net."""
 import logging
 import aiohttp
 import asyncio
@@ -46,7 +46,7 @@ def signed_payload(payload: dict[str, Any]) -> dict[str, Any]:
 
 
 class CloudInverterAPI:
-    """Class to communicate with Cloud Inverter API."""
+    """Class to communicate with CloudInverter.net API."""
 
     def __init__(
         self,
@@ -78,7 +78,7 @@ class CloudInverterAPI:
             await self.session.close()
 
     async def login(self) -> bool:
-        """Login to Cloud Inverter API."""
+        """Login to CloudInverter.net API."""
         try:
             session = await self._get_session()
             
@@ -102,28 +102,28 @@ class CloudInverterAPI:
                         if data.get("status") == "ok":
                             self.token = data.get("token")
                             self.member_auto_id = data.get("MemberAutoID")
-                            _LOGGER.info("Successfully logged in to Cloud Inverter")
+                            _LOGGER.info("Successfully logged in to CloudInverter.net")
                             return True
                         else:
                             # Rejection may also indicate an outdated signature or token.
                             _LOGGER.error(
-                                "Cloud Inverter login rejected (status: %s, code: %s)",
+                                "CloudInverter.net login rejected (status: %s, code: %s)",
                                 data.get("status"),
                                 data.get("code"),
                             )
                             return False
                     else:
-                        _LOGGER.error("Cloud Inverter login HTTP status %s", response.status)
+                        _LOGGER.error("CloudInverter.net login HTTP status %s", response.status)
                         return False
                     
         except asyncio.TimeoutError:
-            _LOGGER.error("Login timeout - could not connect to Cloud Inverter API")
+            _LOGGER.error("Login timeout - could not connect to CloudInverter.net API")
             return False
         except aiohttp.ClientError as err:
-            _LOGGER.error("Cloud Inverter login connection error: %s", type(err).__name__)
+            _LOGGER.error("CloudInverter.net login connection error: %s", type(err).__name__)
             return False
         except Exception:
-            _LOGGER.exception("Unexpected Cloud Inverter login error")
+            _LOGGER.exception("Unexpected CloudInverter.net login error")
             return False
 
     async def get_member_data(self) -> dict[str, Any]:
@@ -314,7 +314,7 @@ class CloudInverterAPI:
                 _LOGGER.error("Test connection failed: Login unsuccessful")
                 return False
             
-            _LOGGER.info("Cloud Inverter authentication succeeded")
+            _LOGGER.info("CloudInverter.net authentication succeeded")
             return True
             
         except Exception as err:

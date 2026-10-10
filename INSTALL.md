@@ -20,13 +20,13 @@ Use **HACS** or **manual installation**. Both provide the same integration.
 ### HACS
 
 1. Install and open [HACS](https://www.hacs.xyz/docs/use/) in Home Assistant.
-2. Add `https://github.com/usamakkhan/home-assistant-Cloud-Inverter` as a custom **Integration** repository. See the [HACS custom repository guide](https://www.hacs.dev/docs/faq/custom_repositories/) if the menu has changed.
+2. Add `https://github.com/usamakkhan/home-assistant-Solar-Touch` as a custom **Integration** repository. See the [HACS custom repository guide](https://www.hacs.dev/docs/faq/custom_repositories/) if the menu has changed.
 3. Find **Solar Touch** in HACS and install it.
 4. **Restart Home Assistant.** A pending restart in HACS means Home Assistant has not yet loaded the new files.
 
 ### Manual
 
-1. Download the [latest release](https://github.com/usamakkhan/home-assistant-Cloud-Inverter/releases) or the repository ZIP.
+1. Download the [latest release](https://github.com/usamakkhan/home-assistant-Solar-Touch/releases) or the repository ZIP.
 2. Copy the whole `custom_components/cloud_inverter` directory into Home Assistant's `/config/custom_components/` directory. Check that `/config/custom_components/cloud_inverter/manifest.json` exists.
 3. Restart Home Assistant. Copying files does not load a new integration until restart.
 
@@ -98,4 +98,4 @@ logger:
     custom_components.cloud_inverter: debug
 ```
 
-Remove credentials, tokens, account identifiers, serials, MAC addresses, and private LAN addresses from logs before sharing them. See the [README](README.md), [changelog](CHANGELOG.md), and [issue tracker](https://github.com/usamakkhan/home-assistant-Cloud-Inverter/issues) for more details.
+Remove credentials, tokens, account identifiers, serials, MAC addresses, and private LAN addresses from logs before sharing them. See the [README](README.md), [changelog](CHANGELOG.md), and [issue tracker](https://github.com/usamakkhan/home-assistant-Solar-Touch/issues) for more details.

@@ -1,4 +1,4 @@
-"""Config flow for Cloud Inverter integration."""
+"""Config flow for Solar Touch integration."""
 from __future__ import annotations
 
 import logging
@@ -72,7 +72,7 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
 
 
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    """Handle a config flow for Cloud Inverter."""
+    """Handle a config flow for Solar Touch."""
 
     VERSION = 1
 

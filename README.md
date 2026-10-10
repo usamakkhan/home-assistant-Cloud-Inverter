@@ -1,11 +1,11 @@
 # ☀️ Solar Touch for Home Assistant
 
-<p align="center"><img src="https://raw.githubusercontent.com/usamakkhan/home-assistant-Cloud-Inverter/main/custom_components/cloud_inverter/brand/icon.png" alt="Solar Touch icon" width="112"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/usamakkhan/home-assistant-Solar-Touch/main/custom_components/cloud_inverter/brand/icon.png" alt="Solar Touch icon" width="112"></p>
 
 <p align="center">
-  <a href="https://github.com/usamakkhan/home-assistant-Cloud-Inverter/releases"><img alt="Release" src="https://img.shields.io/github/v/release/usamakkhan/home-assistant-Cloud-Inverter?color=blue"></a>
-  <a href="https://github.com/usamakkhan/home-assistant-Cloud-Inverter/blob/main/LICENSE"><img alt="PolyForm Strict license" src="https://img.shields.io/badge/license-PolyForm%20Strict-orange"></a>
-  <a href="https://github.com/usamakkhan/home-assistant-Cloud-Inverter/actions"><img alt="Validation" src="https://img.shields.io/github/actions/workflow/status/usamakkhan/home-assistant-Cloud-Inverter/hacs-validation.yml?branch=main&label=validation"></a>
+  <a href="https://github.com/usamakkhan/home-assistant-Solar-Touch/releases"><img alt="Release" src="https://img.shields.io/github/v/release/usamakkhan/home-assistant-Solar-Touch?color=blue"></a>
+  <a href="https://github.com/usamakkhan/home-assistant-Solar-Touch/blob/main/LICENSE"><img alt="PolyForm Strict license" src="https://img.shields.io/badge/license-PolyForm%20Strict-orange"></a>
+  <a href="https://github.com/usamakkhan/home-assistant-Solar-Touch/actions"><img alt="Validation" src="https://img.shields.io/github/actions/workflow/status/usamakkhan/home-assistant-Solar-Touch/hacs-validation.yml?branch=main&label=validation"></a>
 </p>
 
 Read SolarMax/Senergy inverter telemetry in Home Assistant through **one of two setup choices**:
@@ -21,10 +21,10 @@ existing entity ID may still start with `sensor.cloud_inverter_` after the
 display name changes to Solar Touch.
 
 > [!NOTE]
-> **License from v1.5.0:** [PolyForm Strict License 1.0.0](https://github.com/usamakkhan/home-assistant-Cloud-Inverter/blob/main/LICENSE). It permits noncommercial use but does not grant permission to redistribute the integration, sell copies, or publish modified versions. Copyright © 2026 Usama Khan. Earlier versions released under MIT retain their original license terms.
+> **License from v1.5.0:** [PolyForm Strict License 1.0.0](https://github.com/usamakkhan/home-assistant-Solar-Touch/blob/main/LICENSE). It permits noncommercial use but does not grant permission to redistribute the integration, sell copies, or publish modified versions. Copyright © 2026 Usama Khan. Earlier versions released under MIT retain their original license terms.
 
 > [!IMPORTANT]
-> GitHub currently reports PolyForm Strict as an unidentified license (`NOASSERTION`), so this repository's **HACS validation action fails its license check**. The code tests pass. If HACS does not offer this version, use the [manual installation steps](https://github.com/usamakkhan/home-assistant-Cloud-Inverter/blob/main/INSTALL.md#manual). The project will not label this release as MIT to make validation pass because that would grant rights the maintainer has not offered.
+> GitHub currently reports PolyForm Strict as an unidentified license (`NOASSERTION`), so this repository's **HACS validation action fails its license check**. The code tests pass. If HACS does not offer this version, use the [manual installation steps](https://github.com/usamakkhan/home-assistant-Solar-Touch/blob/main/INSTALL.md#manual). The project will not label this release as MIT to make validation pass because that would grant rights the maintainer has not offered.
 
 > [!IMPORTANT]
 > On the installation reported by the project owner, the **inverter uploads data to CloudInverter.net about every five minutes**. A Home Assistant cloud refresh can happen more often, but it may receive the **same uploaded reading** until the inverter sends its next update. The integration does not control the inverter's upload schedule.
@@ -99,18 +99,18 @@ both derived power sensors unavailable; it is not interpreted as zero.
 
 ### Option A: HACS
 
-1. In HACS, add `https://github.com/usamakkhan/home-assistant-Cloud-Inverter` as a **custom Integration repository**.
+1. In HACS, add `https://github.com/usamakkhan/home-assistant-Solar-Touch` as a **custom Integration repository**.
 2. Install **Solar Touch** from HACS.
 3. Restart Home Assistant.
 4. Go to **Settings → Devices & services → Add integration**, search for **Solar Touch**, and choose your data source.
 
 ### Option B: manual installation
 
-1. Download the [latest release](https://github.com/usamakkhan/home-assistant-Cloud-Inverter/releases) or the repository ZIP.
+1. Download the [latest release](https://github.com/usamakkhan/home-assistant-Solar-Touch/releases) or the repository ZIP.
 2. Copy the entire `custom_components/cloud_inverter` directory into Home Assistant's `/config/custom_components/` directory. The result should contain `/config/custom_components/cloud_inverter/manifest.json`.
 3. Restart Home Assistant, then add **Solar Touch** from **Settings → Devices & services**.
 
-See the [detailed installation guide](https://github.com/usamakkhan/home-assistant-Cloud-Inverter/blob/main/INSTALL.md) for step-by-step setup, network checks, and updating. HACS and manual installation provide the same two setup choices.
+See the [detailed installation guide](https://github.com/usamakkhan/home-assistant-Solar-Touch/blob/main/INSTALL.md) for step-by-step setup, network checks, and updating. HACS and manual installation provide the same two setup choices.
 
 ## 🏠 Set up direct inverter LAN access
 
@@ -170,5 +170,5 @@ Remove or redact passwords, tokens, account IDs, serials, MAC addresses, and pri
 ## 🧪 Development, support, and license
 
 - Run the integration tests with `python -m unittest discover -s tests -v`. They cover signing, URL validation, direct Modbus checks, capture behavior, and freshness logic; they do not replace a real inverter and Home Assistant test.
-- Review release changes in the [changelog](https://github.com/usamakkhan/home-assistant-Cloud-Inverter/blob/main/CHANGELOG.md) and report reproducible problems through [GitHub Issues](https://github.com/usamakkhan/home-assistant-Cloud-Inverter/issues), using sanitized details.
-- Versions from v1.5.0 use the [PolyForm Strict License 1.0.0](https://github.com/usamakkhan/home-assistant-Cloud-Inverter/blob/main/LICENSE). For redistribution or commercial licensing, contact the copyright holder. Bundled integration icons live in [`brand/`](https://github.com/usamakkhan/home-assistant-Cloud-Inverter/tree/main/custom_components/cloud_inverter/brand); [Home Assistant's brand image guidance](https://developers.home-assistant.io/docs/core/integration/brand_images/) explains how Home Assistant displays integration assets.
+- Review release changes in the [changelog](https://github.com/usamakkhan/home-assistant-Solar-Touch/blob/main/CHANGELOG.md) and report reproducible problems through [GitHub Issues](https://github.com/usamakkhan/home-assistant-Solar-Touch/issues), using sanitized details.
+- Versions from v1.5.0 use the [PolyForm Strict License 1.0.0](https://github.com/usamakkhan/home-assistant-Solar-Touch/blob/main/LICENSE). For redistribution or commercial licensing, contact the copyright holder. Bundled integration icons live in [`brand/`](https://github.com/usamakkhan/home-assistant-Solar-Touch/tree/main/custom_components/cloud_inverter/brand); [Home Assistant's brand image guidance](https://developers.home-assistant.io/docs/core/integration/brand_images/) explains how Home Assistant displays integration assets.

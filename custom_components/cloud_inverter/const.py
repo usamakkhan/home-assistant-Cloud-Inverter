@@ -1,4 +1,4 @@
-"""Constants for the Cloud Inverter integration."""
+"""Constants for the Solar Touch integration."""
 
 DOMAIN = "cloud_inverter"
 

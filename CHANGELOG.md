@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.5.4 — 2026-10-09
+
+- Rename the GitHub repository to **home-assistant-Solar-Touch** and update
+  installation, documentation, icon, badge, and issue links.
+- Use Solar Touch in integration logs and source descriptions. Keep the vendor
+  service name **CloudInverter.net** where it identifies the cloud data source.
+- Keep the internal `cloud_inverter` Home Assistant domain and directory as
+  requested. Existing config entries and entity IDs continue to work.
+
 ## 1.5.3 — 2026-10-09
 
 - Rename the integration displayed by Home Assistant and HACS to **Solar Touch**.

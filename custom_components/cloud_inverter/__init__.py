@@ -1,4 +1,4 @@
-"""The Cloud Inverter integration."""
+"""The Solar Touch integration."""
 from __future__ import annotations
 
 import logging
@@ -17,7 +17,7 @@ PLATFORMS: list[Platform] = [Platform.SENSOR]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Set up Cloud Inverter from a config entry."""
+    """Set up Solar Touch from a config entry."""
     # Keep user-customized titles; migrate only titles created by older releases.
     if entry.title == "Cloud Inverter Direct":
         hass.config_entries.async_update_entry(entry, title="Solar Touch Direct")
@@ -40,7 +40,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         )
     hass.data[DOMAIN][entry.entry_id] = {"goods_id": entry.data.get(CONF_GOODS_ID)}
     
-    _LOGGER.info("Setting up Cloud Inverter %s integration", source)
+    _LOGGER.info("Setting up Solar Touch %s integration", source)
     
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     
@@ -55,7 +55,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             if api is not None:
                 await api.close()
         hass.data[DOMAIN].pop(entry.entry_id)
-        _LOGGER.info("Unloaded Cloud Inverter integration")
+        _LOGGER.info("Unloaded Solar Touch integration")
     
     return unload_ok
 
