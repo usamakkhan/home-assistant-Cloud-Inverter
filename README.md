@@ -57,7 +57,9 @@ The diagram shows the two available paths; select one when adding the integratio
 Depending on the source and inverter, readings can cover:
 
 - **Solar production:** PV power, input voltage/current, and MPPT values.
-- **Grid:** import/export power, voltage, current, and energy counters when provided.
+- **Grid:** signed Grid Power plus separate **Instantaneous Power Import** and
+  **Instantaneous Power Export** sensors, voltage, current, and energy counters
+  when provided. Positive Grid Power is import; negative Grid Power is export.
 - **Battery:** state of charge, charge/discharge power, voltage/current, and energy when reported.
 - **Loads and outputs:** available household, backup, and generator-side measurements.
 - **Device health:** operating mode, temperatures, status, and selected device metadata.
@@ -81,6 +83,12 @@ Open **Settings → Dashboards → Energy** and use the following cumulative **k
 If one of these sensors is missing from a selector, open **Settings → Developer Tools → States** and find its actual entity ID. Check that it has a numeric state, `device_class: energy`, `state_class: total_increasing`, and `unit_of_measurement: kWh`. These are set by the integration for the cloud total sensors. Then check **Settings → Developer Tools → Statistics** for errors affecting that entity, and confirm the Recorder integration is recording it. Home Assistant's [Energy FAQ](https://www.home-assistant.io/docs/energy/faq/) explains the selector requirements, and its [long-term statistics guide](https://www.home-assistant.io/docs/configuration/long-term-statistics/) explains how cumulative changes are counted. If it still does not appear, report the exact Energy field, entity ID, and sanitized attributes; hide serial numbers and account details.
 
 Home Assistant controls the Energy dashboard's suggested choices and saved configuration. The integration exposes eligible sensors, but you select each sensor in the matching Energy field.
+
+**Instantaneous Solar Production**, **Instantaneous Power Import**, and
+**Instantaneous Power Export** are power sensors in W for live dashboards. The
+Energy dashboard's production and consumption totals require the cumulative
+kWh sensors in the table above. An unavailable signed Grid Power reading leaves
+both derived power sensors unavailable; it is not interpreted as zero.
 
 ## 🚀 Install in Home Assistant
 

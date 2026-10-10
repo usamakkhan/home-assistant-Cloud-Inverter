@@ -34,7 +34,7 @@ from homeassistant.helpers.update_coordinator import (
 
 from .api import CloudInverterAPI
 from .cloud_identity import cloud_sensor_unique_id, migrate_legacy_sensor_ids
-from .numeric import numeric_state
+from .numeric import numeric_state, split_grid_power
 from .const import (
     DOMAIN,
     UPDATE_INTERVAL,
@@ -101,7 +101,7 @@ async def async_setup_entry(
     
     # Photovoltaic (Solar) Sensors
     sensors.extend([
-        CloudInverterSensor(coordinator, "Pac", "PV Power", UnitOfPower.WATT, SensorDeviceClass.POWER, SensorStateClass.MEASUREMENT),
+        CloudInverterSensor(coordinator, "Pac", "Instantaneous Solar Production", UnitOfPower.WATT, SensorDeviceClass.POWER, SensorStateClass.MEASUREMENT),
         CloudInverterSensor(coordinator, "Vdc_0", "PV Voltage MPPT1", UnitOfElectricPotential.VOLT, SensorDeviceClass.VOLTAGE, SensorStateClass.MEASUREMENT),
         CloudInverterSensor(coordinator, "Vdc_1", "PV Voltage MPPT2", UnitOfElectricPotential.VOLT, SensorDeviceClass.VOLTAGE, SensorStateClass.MEASUREMENT),
         CloudInverterSensor(coordinator, "Idc_0", "PV Current MPPT1", UnitOfElectricCurrent.AMPERE, SensorDeviceClass.CURRENT, SensorStateClass.MEASUREMENT),
@@ -123,6 +123,8 @@ async def async_setup_entry(
         CloudInverterSensor(coordinator, "gridIac", "Grid Current", UnitOfElectricCurrent.AMPERE, SensorDeviceClass.CURRENT, SensorStateClass.MEASUREMENT),
         CloudInverterSensor(coordinator, "gridFac", "Grid Frequency", UnitOfFrequency.HERTZ, SensorDeviceClass.FREQUENCY, SensorStateClass.MEASUREMENT),
         CloudInverterSensor(coordinator, "gridCurrpac", "Grid Power", UnitOfPower.WATT, SensorDeviceClass.POWER, SensorStateClass.MEASUREMENT),
+        CloudInverterSensor(coordinator, "grid_import_power", "Instantaneous Power Import", UnitOfPower.WATT, SensorDeviceClass.POWER, SensorStateClass.MEASUREMENT),
+        CloudInverterSensor(coordinator, "grid_export_power", "Instantaneous Power Export", UnitOfPower.WATT, SensorDeviceClass.POWER, SensorStateClass.MEASUREMENT),
         CloudInverterSensor(coordinator, "ETDay", "Grid Export Today", UnitOfEnergy.KILO_WATT_HOUR, SensorDeviceClass.ENERGY, SensorStateClass.TOTAL_INCREASING),
         CloudInverterSensor(coordinator, "EFDay", "Grid Import Today", UnitOfEnergy.KILO_WATT_HOUR, SensorDeviceClass.ENERGY, SensorStateClass.TOTAL_INCREASING),
         CloudInverterSensor(coordinator, "ETTotal", "Grid Export Total", UnitOfEnergy.KILO_WATT_HOUR, SensorDeviceClass.ENERGY, SensorStateClass.TOTAL_INCREASING),
@@ -257,6 +259,11 @@ class CloudInverterDataUpdateCoordinator(DataUpdateCoordinator):
                             flattened_data[f"{key}_{subkey}"] = subvalue
                     else:
                         flattened_data[key] = value
+
+            if "gridCurrpac" in flattened_data:
+                import_power, export_power = split_grid_power(flattened_data["gridCurrpac"])
+                flattened_data["grid_import_power"] = import_power
+                flattened_data["grid_export_power"] = export_power
             
             # Calculate battery power (charging is positive, discharging is negative)
             if "toPbat" in flattened_data and "fromPbat" in flattened_data:

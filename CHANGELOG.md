@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.5.2 — 2026-10-09
+
+- Add **Instantaneous Power Import** and **Instantaneous Power Export** cloud
+  sensors in watts. Positive signed Grid Power becomes import; negative Grid
+  Power becomes a positive export magnitude. Both read zero at zero grid power,
+  and both are unavailable when the portal reading is missing or invalid.
+- Display the existing PV Power reading as **Instantaneous Solar Production**.
+  Its unique ID remains the same, preserving existing dashboard references.
+- Keep the original signed Grid Power sensor for existing automations.
+
 ## 1.5.1 — 2026-10-09
 
 - Treat an empty CloudInverter.net response as a failed refresh. Home Assistant

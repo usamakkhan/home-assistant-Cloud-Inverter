@@ -20,3 +20,13 @@ class NumericStateTests(unittest.TestCase):
         for value in (None, "", "-", "offline", "NaN", "Infinity", True):
             with self.subTest(value=value):
                 self.assertIsNone(numeric.numeric_state(value))
+
+    def test_signed_grid_power_splits_into_import_and_export(self):
+        for reading, expected in (
+            ("2,040", (2040.0, 0.0)),
+            (-750, (0.0, 750.0)),
+            (0, (0.0, 0.0)),
+            ("-", (None, None)),
+        ):
+            with self.subTest(reading=reading):
+                self.assertEqual(numeric.split_grid_power(reading), expected)
